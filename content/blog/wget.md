@@ -2,6 +2,9 @@
 title = "Linux下wget下载整个FTP目录(含子目录)"
 
 date = 2020-09-05
+
+[taxonomies]
+tags = ["Linux", "网络"]
 +++
 ```shell
 wget -nH -m --ftp-user=your_username --ftp-password=your_password ftp://your_ftp_host/*

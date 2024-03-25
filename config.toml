@@ -44,7 +44,7 @@ hard_link_static = false
             { name = "Home", url = "@/_index.md", icon = "bi-house" },
             { name = "Blog", url = "@/blog/_index.md", icon = "bi-file-earmark-text" },
             # { name = "Author", url = "https://flyingicedragon.github.io/", icon = "bi-person" },
-            { name = "About", url = "https://flyingicedragon.github.com/", icon = "bi-question-octagon" }
+            { name = "About", url = "https://flyingicedragon.github.io/", icon = "bi-question-octagon" }
         ]
     
     [extra.social]
