@@ -6,7 +6,7 @@ date = 2020-09-05
 [taxonomies]
 tags = ["Linux", "网络"]
 +++
-```shell
+```bash
 wget -nH -m --ftp-user=your_username --ftp-password=your_password ftp://your_ftp_host/*
 ```
 
@@ -19,7 +19,7 @@ ftp://.../*：FTP 主机地址。最后可以跟目录名来下载指定目录�
 
 例子：
 
-```shell
+```bash
 wget -nH -m --ftp-user=tom --ftp-password=123456 ftp://192.168.19.1/tom/
 ```
 
