@@ -5,6 +5,7 @@ date = 2020-09-05
 
 [taxonomies]
 tags = ["Linux", "网络"]
+categories = ["technology"]
 +++
 ```bash
 wget -nH -m --ftp-user=your_username --ftp-password=your_password ftp://your_ftp_host/*
