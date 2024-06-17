@@ -4,7 +4,7 @@ title = "从 gff 到 gggenes 绘制基因结构图"
 date = 2024-06-12
 
 [taxonomies]
-tags = ["gggenes", "visualization", "R", "Python"]
+tags = ["bioinformatics", "visualization", "R", "Python"]
 categories = ["technology"]
 +++
 
