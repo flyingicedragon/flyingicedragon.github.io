@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>利用 certbot 配置 SSL 证书 - 冰龙圣土</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap">
+  <link rel="stylesheet" href="https://flyingicedragon.github.io/assets/css/custom.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css"><link rel="apple-touch-icon" sizes="180x180" href="https://flyingicedragon.github.io/images/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://flyingicedragon.github.io/images/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://flyingicedragon.github.io/images/favicon/favicon-16x16.png">
+    <link rel="manifest" href="https://flyingicedragon.github.io/images/favicon/site.webmanifest">
+    <link rel="mask-icon" href="https://flyingicedragon.github.io/images/favicon/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#2d89ef">
+    <meta name="theme-color" content="#ffffff"><link rel="canonical" href="https://flyingicedragon.github.io/blog/certbot/" /><link rel="alternate" type="application/atom+xml"
+        title="RSS" href="https://flyingicedragon.github.io/atom.xml"
+      ><meta name="author" content="icedragon"><meta property="article:published_time" content='2024-04-10' /><meta name="keywords" content="Linux,网络,"><meta name="generator" content="Zola">
+  <meta property="og:title" content="利用 certbot 配置 SSL 证书" />
+  <meta property="og:url" content="https://flyingicedragon.github.io/blog/certbot/" /><meta property="og:site_name" content="冰龙圣土" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta name="twitter:card" content="summary" /><meta name="twitter:creator" content="@user" /><meta name="google-site-verification" content="0123457890abcdefg" />
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-0123456789"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-0123456789');
+    </script>
+</head>
+<body>
+  <div class="container-fluid vh-100">
+    <div class="row h-100"><div
+    class="sidebar d-none d-lg-block col-lg-3 col-xl-2 mh-100 p-0 overflow-auto"
+  >
+    <aside class="d-flex flex-column justify-content-between h-100">
+      <div class="d-none d-md-block mb-4 pt-5 px-4 text-center">
+        <div class="sidebar-avatar mb-2 mx-auto border border-3 rounded-circle">
+          <a href="https://flyingicedragon.github.io/" target="_blank" rel="noopener noreferrer">
+    <img
+      src="https://flyingicedragon.github.io/images/avatar.png"
+      alt="icedragon"
+      class="img-fluid"
+    >
+  </a>
+        </div>
+        <div class="mb-1">
+          <a
+            href="https://flyingicedragon.github.io/"
+            class="sidebar-title fs-5 fw-bold text-decoration-none"
+          >
+            冰龙圣土
+          </a>
+        </div>
+        <div class="fw-light">
+          飞舞的冰龙的个人空间
+        </div>
+      </div>
+
+      <div class="sidebar-nav list-group my-auto rounded-0 text-center"><a
+        href="https://flyingicedragon.github.io/"
+        class="sidebar-nav-item list-group-item list-group-item-action border border-0"
+        data-bs-toggle="tooltip" data-bs-title="Home"
+      >
+        <span class="sidebar-nav-icon bi bi-house d-none fs-4"></span>
+        <span class="sidebar-nav-text d-none d-md-inline">
+          Home
+        </span>
+      </a><a
+        href="https://flyingicedragon.github.io/blog/"
+        class="sidebar-nav-item list-group-item list-group-item-action border border-0"
+        data-bs-toggle="tooltip" data-bs-title="Blog"
+      >
+        <span class="sidebar-nav-icon bi bi-file-earmark-text d-none fs-4"></span>
+        <span class="sidebar-nav-text d-none d-md-inline">
+          Blog
+        </span>
+      </a><a
+        href="https://flyingicedragon.github.io/"
+        class="sidebar-nav-item list-group-item list-group-item-action border border-0"
+        data-bs-toggle="tooltip" data-bs-title="About"
+      >
+        <span class="sidebar-nav-icon bi bi-question-octagon d-none fs-4"></span>
+        <span class="sidebar-nav-text d-none d-md-inline">
+          About
+        </span>
+      </a></div>
+
+      <div class="sidebar-social d-none d-md-block mt-4 pb-4 px-4">
+        <div class="container-fluid">
+          <div class="row justify-content-center">
+            <div class="col-auto px-2">
+        <a
+          href="mailto:flyingicedragon@outlook.com"
+          target="_blank" rel="noopener noreferrer"
+          data-bs-toggle="tooltip"
+          data-bs-title='Email'
+          class="text-decoration-none"
+        >
+          <span class="bi bi-envelope-fill"></span>
+        </a>
+      </div><div class="col-auto px-2">
+        <a
+          href="https://github.com/flyingicedragon"
+          target="_blank" rel="noopener noreferrer"
+          data-bs-toggle="tooltip"
+          data-bs-title='GitHub'
+          class="text-decoration-none"
+        >
+          <span class="bi bi-github"></span>
+        </a>
+      </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div><div class="col mh-100 overflow-auto px-0"><nav
+    class="navbar navbar-expand navbar-bg-light sticky-top border-bottom"
+  >
+    <div class="container-fluid"><button
+        type="button"
+        class="btn d-block d-lg-none fs-5"
+        data-bs-toggle="offcanvas" data-bs-target="#offcanvas"
+        aria-controls="offcanvas"
+      >
+        <span class="bi bi-list"></span>
+      </button>
+      
+      <div class="col-8">
+        
+          <div class="row justify-content-center justify-content-lg-start p-2 ps-xl-3 text-center"><div class="col-auto d-none d-xl-block">
+        <a
+          href="https://flyingicedragon.github.io/blog/"
+          class="text-decoration-none"
+        >
+          Blog
+        </a>
+      </div>
+      <div class="col-auto d-none d-xl-block">
+        <span class="text-secondary">
+          »
+        </span>
+      </div><div class="col-auto">
+      <span
+        class="d-inline d-sm-none text-secondary"
+        data-bs-toggle="tooltip"
+        data-bs-title="利用 certbot 配置 SSL 证书"
+      >
+        利用 certbot 配置 SS…
+      </span>
+      <span
+        class="d-none d-sm-inline text-secondary"
+        data-bs-toggle="tooltip"
+        data-bs-title="利用 certbot 配置 SSL 证书"
+      >
+        利用 certbot 配置 SSL 证书
+      </span>
+    </div>
+  </div>
+        
+      </div>
+
+      <button
+    type="button" data-bs-toggle="modal" data-bs-target="#searchModal"
+    class="btn border border-0"
+  >
+    <span class="bi bi-search fs-5"></span>
+  </button>
+    </div>
+  </nav><div class="d-flex flex-column h-100"><main class="container">
+    <div class="row justify-content-center mt-5">
+      <div class="col-11 col-lg-10 col-xxl-9">
+        <h1 class="mb-3">
+          利用 certbot 配置 SSL 证书
+        </h1>
+        <div class="row mt-3 mb-2">
+          <div class="col-auto">
+            <small class="text-muted">
+              By:
+              <a
+                href="https://flyingicedragon.github.io/"
+                target="_blank" rel="noopener noreferrer"
+                class="text-decoration-none"
+              >
+                icedragon
+              </a>
+            </small>
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-auto mb-2">
+            <small class="text-muted">
+              Posted:
+              <time datetime="2024-04-10">
+                <a 
+                  href="#" data-bs-toggle="tooltip"
+                  data-bs-title="Wednesday, April 10, 2024 12:00:00 AM UTC"
+                  class="text-muted text-decoration-none"
+                >
+                  April 10, 2024
+                </a>
+              </time>
+            </small>
+          </div>
+          
+        </div><div class="mb-5">
+          <p><code>certbot</code> 是 <code>Let’s Encrypt</code> 提供的官方工具，用于辅助获取 SSL 证书。</p>
+<h2 id="certbot-an-zhuang">certbot 安装</h2>
+<p>官方建议的安装方式是利用 <code>snap</code>。但是个人实在是讨厌 <code>snap</code> 这个工具，而是更青睐于 <code>apt</code>。<code>certbot</code> 包含在了 Debian 官方仓库中，可以直接安装。</p>
+<pre data-lang="bash" style="background-color:#282828;color:#fdf4c1aa;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#fdf4c1;">apt install certbot
+</span><span style="color:#fdf4c1;">apt install certbot --install-suggests
+</span></code></pre>
+<p>如果需要 <code>apache</code> 或者 <code>nginx</code> 的自动配置，可以直接安装 suggests 部分。如果不需要，则无需添加 <code>--install-suggests</code>。</p>
+<p>此外，还可以考虑使用 <a rel="noopener nofollow noreferrer" target="_blank" href="https://dl.eff.org/certbot-auto">certbot-auto</a>。</p>
+<h2 id="sheng-cheng-ssl-zheng-shu">生成 SSL 证书</h2>
+<h3 id="jiao-hu-shi-shou-dong-huo-qu-ren-zheng-manual">交互式手动获取认证 <code>--manual</code></h3>
+<p>以下两种域名可以通过指定多个 <code>-d</code> 参数一次性完成。</p>
+<h4 id="fan-yu-ming-zheng-shu">泛域名证书</h4>
+<pre data-lang="bash" style="background-color:#282828;color:#fdf4c1aa;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#fdf4c1;">certbot run -d </span><span style="color:#b8bb26;">&quot;*.example.com&quot;</span><span style="color:#fdf4c1;"> --manual
+</span></code></pre>
+<p>泛域名认证需要添加一条 TXT 类型域名记录，根据提示操作即可。</p>
+<img alt="DNS TXT" src="DNS_TXT.png" width="100%">
+<h4 id="pu-tong-yu-ming-zheng-shu">普通域名证书</h4>
+<pre data-lang="bash" style="background-color:#282828;color:#fdf4c1aa;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#fdf4c1;">certbot run -d </span><span style="color:#b8bb26;">&quot;example.com&quot;</span><span style="color:#fdf4c1;"> --manual
+</span></code></pre>
+<p>需要搭建一个临时 HTTP 服务器包含有指定的内容。</p>
+<h3 id="nginx-apache-deng">nginx、apache 等</h3>
+<p>可以直接利用 <code>--nginx</code>、<code>--apache</code> 参数调用 plugin 辅助完成。<code>certbot</code> 会自动修改配置文件。</p>
+<h2 id="cha-kan-zheng-shu-zhuang-tai">查看证书状态</h2>
+<p>证书三个月内有效，可以查看证书状态。</p>
+<pre data-lang="bash" style="background-color:#282828;color:#fdf4c1aa;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#fdf4c1;">certbot certificates
+</span></code></pre>
+<h2 id="xu-qian-zheng-shu">续签证书</h2>
+<pre data-lang="bash" style="background-color:#282828;color:#fdf4c1aa;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#fdf4c1;">certbot renew
+</span></code></pre>
+<p>根据情况添加参数。续签证书和首次生成相同，需要重新进行认证。普通域名配合 <code>nginx</code> 等工具可以很方便完成，泛域名需要修改 DNS 记录。可以利用 <code>--manual-auth-hook</code> 和 <code>--manual-cleanup-hook</code> 参数来提供脚本配合 DNS 服务商的 api 实现自动修改 DNS 记录。<code>renew</code> 不支持交互方式完成。</p>
+<p>因为获取证书有次数限制，建议使用 <code>--dry-run</code> 进行测试。测试完成后，<code>renew</code> 会自动进行 30 天内过期证书的续签工作。</p>
+<p>参考资料：<a rel="noopener nofollow noreferrer" target="_blank" href="https://eff-certbot.readthedocs.io/en/latest/index.html">Certbot</a></p>
+
+        </div>
+        
+          <div class="row my-1">
+            <div class="col-auto">
+              <span class="bi bi-bookmarks fs-6 me-1"></span>
+              
+    <a
+      href="https://flyingicedragon.github.io/categories/technology/"
+      class="btn btn-taxonomy btn-sm m-1 border text-decoration-none"
+    >
+      <small>
+        technology
+      </small>
+    </a>
+  
+            </div>
+          </div>
+        
+        
+          <div class="row mt-1 mb-3">
+            <div class="col-auto">
+              <span class="bi bi-tags fs-6 me-1"></span>
+              
+    <a
+      href="https://flyingicedragon.github.io/tags/linux/"
+      class="btn btn-taxonomy btn-sm m-1 border text-decoration-none"
+    >
+      <small>
+        Linux
+      </small>
+    </a>
+  
+    <a
+      href="https://flyingicedragon.github.io/tags/wang-luo/"
+      class="btn btn-taxonomy btn-sm m-1 border text-decoration-none"
+    >
+      <small>
+        网络
+      </small>
+    </a>
+  
+            </div>
+          </div>
+        
+      </div>
+    </div>
+  </main><div class="container">
+    <div class="row justify-content-center mt-3 mb-4">
+      <div class="col-11 col-lg-10 col-xxl-9"></div>
+    </div>
+  </div><footer class="container-fluid mt-auto">
+    <div class="row justify-content-center">
+      <div class="col-10">
+        <div class="row pt-3 pb-4 border-top">
+          <div class="col-12 col-md-6 mb-2 mb-md-0 text-center text-md-start">
+            <small class="text-secondary">
+              © 2025
+              <a 
+                href="https://flyingicedragon.github.io/"
+                target="_blank" rel="noopener noreferrer"
+                class="text-decoration-none"
+              >
+                icedragon&period;
+              </a>
+              <a
+                href="https://creativecommons.org/licenses/by/4.0/"
+                data-bs-toggle="tooltip"
+                data-bs-title="Except where otherwise noted, the blog posts on this site are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) License by the author."
+                class="text-secondary text-decoration-none"
+              >
+                Some rights reserved.
+              </a>
+            </small>
+          </div>
+          <div class="col-12 col-md-6 text-center text-md-end">
+            <small class="text-secondary">
+              Powered by
+              <a 
+                href="https://www.getzola.org/"
+                target="_blank" rel="noopener noreferrer"
+                class="text-decoration-none"
+              >
+                Zola
+              </a>
+              with
+              <a 
+                href="https://github.com/gersonbdev/ataraxia-zola"
+                target="_blank" rel="noopener noreferrer"
+                class="text-decoration-none"
+              >
+                Ataraxia
+              </a>
+              theme.
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvas" aria-labelledby="offcanvasLabel">
+    <div class="offcanvas-body p-0">
+      <div class="sidebar container-fluid vh-100">
+        <div class="row h-100">
+          <div
+            class="col mh-100 px-0 overflow-auto"
+          >
+            <aside class="d-flex flex-column justify-content-between h-100">
+              <div class="mb-4 pt-5 px-3 text-center">
+                <div class="sidebar-avatar mb-2 mx-auto border border-3 rounded-circle">
+                  <a href="https://flyingicedragon.github.io/" target="_blank" rel="noopener noreferrer">
+    <img
+      src="https://flyingicedragon.github.io/images/avatar.png"
+      alt="icedragon"
+      class="img-fluid"
+    >
+  </a>
+                </div>
+                <div>
+                  <a
+                    href="https://flyingicedragon.github.io/"
+                    class="sidebar-title fs-5 fw-bold text-decoration-none"
+                  >
+                    冰龙圣土
+                  </a>
+                </div>
+              </div>
+
+              <div class="sidebar-nav list-group my-auto rounded-0 text-start"><a
+        href="https://flyingicedragon.github.io/"
+        class="sidebar-nav-item list-group-item list-group-item-action border border-0"
+        data-bs-toggle="tooltip" data-bs-title="Home"
+      >
+        <span class="sidebar-nav-icon bi bi-house ms-2 me-1 fs-4"></span>
+        <span class="sidebar-nav-text">Home</span>
+      </a><a
+        href="https://flyingicedragon.github.io/blog/"
+        class="sidebar-nav-item list-group-item list-group-item-action border border-0"
+        data-bs-toggle="tooltip" data-bs-title="Blog"
+      >
+        <span class="sidebar-nav-icon bi bi-file-earmark-text ms-2 me-1 fs-4"></span>
+        <span class="sidebar-nav-text">Blog</span>
+      </a><a
+        href="https://flyingicedragon.github.io/"
+        class="sidebar-nav-item list-group-item list-group-item-action border border-0"
+        data-bs-toggle="tooltip" data-bs-title="About"
+      >
+        <span class="sidebar-nav-icon bi bi-question-octagon ms-2 me-1 fs-4"></span>
+        <span class="sidebar-nav-text">About</span>
+      </a></div>
+
+              <div class="sidebar-social mt-4 pb-4 px-3">
+                <div class="container-fluid">
+                  <div class="row justify-content-center">
+                    <div class="col-auto px-2">
+        <a
+          href="mailto:flyingicedragon@outlook.com"
+          target="_blank" rel="noopener noreferrer"
+          data-bs-toggle="tooltip"
+          data-bs-title='Email'
+          class="text-decoration-none"
+        >
+          <span class="bi bi-envelope-fill"></span>
+        </a>
+      </div><div class="col-auto px-2">
+        <a
+          href="https://github.com/flyingicedragon"
+          target="_blank" rel="noopener noreferrer"
+          data-bs-toggle="tooltip"
+          data-bs-title='GitHub'
+          class="text-decoration-none"
+        >
+          <span class="bi bi-github"></span>
+        </a>
+      </div>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="searchModalLabel">
+          搜索
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div
+          id="searchInput" role="search" 
+          class="d-flex mb-3 border rounded-5 bg-white"
+        >
+          <input
+            id="search" type="search"
+            class="form-control border border-0 rounded-5 rounded-end"
+            placeholder="搜索"
+            aria-label="搜索"
+          >
+          <div class="rounded-5 rounded-start py-2 ps-2 pe-3">
+            <span class="bi bi-search"></span>
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  <script src="https://flyingicedragon.github.io/assets/js/bootstrap/bootstrap.bundle.min.js"></script>
+  <script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    const myModal = document.getElementById('searchModal');
+    const myInput = document.getElementById('searchInput');
+
+    myModal.addEventListener('shown.bs.modal', () => {
+      myInput.focus()
+    });
+  </script>
+  <script src="https://flyingicedragon.github.io/elasticlunr.min.js"></script>
+  <script src="https://flyingicedragon.github.io/search_index.zh.js"></script><script src="https://flyingicedragon.github.io/assets/js/search/lunr.stemmer.support.min.js"></script>
+    <script src="https://flyingicedragon.github.io/assets/js/search/lunr.zh.min.js"></script><script src="https://flyingicedragon.github.io/assets/js/search/search.js"></script>
+</body>
+</html>

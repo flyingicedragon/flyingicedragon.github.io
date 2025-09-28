@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh">
+    <title>冰龙圣土 - git</title>
+    <subtitle>飞舞的冰龙的个人空间</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://flyingicedragon.github.io/tags/git/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://flyingicedragon.github.io/"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2025-09-26T00:00:00+00:00</updated>
+    <id>https://flyingicedragon.github.io/tags/git/atom.xml</id>
+    <entry xml:lang="zh">
+        <title>git merge driver简介</title>
+        <published>2025-09-26T00:00:00+00:00</published>
+        <updated>2025-09-26T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://flyingicedragon.github.io/blog/git-merge-driver/"/>
+        <id>https://flyingicedragon.github.io/blog/git-merge-driver/</id>
+        
+        <content type="html" xml:base="https://flyingicedragon.github.io/blog/git-merge-driver/">&lt;p&gt;Git 的合并驱动（merge driver）是一种高级功能，允许你自定义 Git 处理文件合并冲突的方式。默认情况下，Git 会尝试自动合并文件，若冲突则标记冲突内容让用户手动解决。而合并驱动能让你编写规则，告诉 Git 如何智能处理特定文件的合并。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;yi-he-bing-qu-dong-de-he-xin-yuan-li&quot;&gt;一、合并驱动的核心原理&lt;&#x2F;h3&gt;
+&lt;ol&gt;
+&lt;li&gt;当 Git 合并两个分支时，会检查 &lt;code&gt;.gitattributes&lt;&#x2F;code&gt; 文件，查看是否有文件配置了 &lt;code&gt;merge=xxx&lt;&#x2F;code&gt; 规则&lt;&#x2F;li&gt;
+&lt;li&gt;若有，则调用名为 &lt;code&gt;xxx&lt;&#x2F;code&gt; 的合并驱动处理该文件&lt;&#x2F;li&gt;
+&lt;li&gt;驱动可以是简单的命令（如 &lt;code&gt;true&lt;&#x2F;code&gt;），也可以是复杂的脚本，决定最终保留哪个版本的文件&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h3 id=&quot;er-ji-chu-pei-zhi-bu-zou-bi-zuo&quot;&gt;二、基础配置步骤（必做）&lt;&#x2F;h3&gt;
+&lt;h4 id=&quot;bu-zou-1-ding-yi-wen-jian-yu-qu-dong-de-guan-lian-gitattributes&quot;&gt;步骤1：定义文件与驱动的关联（&lt;code&gt;.gitattributes&lt;&#x2F;code&gt;）&lt;&#x2F;h4&gt;
+&lt;p&gt;在项目根目录创建 &lt;code&gt;.gitattributes&lt;&#x2F;code&gt; 文件，指定哪些文件使用哪个驱动：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;# 格式：[文件路径] merge=[驱动名称]
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;config&#x2F;personal.env merge=ignore-personal  &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;# 个人配置文件用自定义驱动
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;*.json merge=keep-ours  &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;# 所有JSON文件用另一个驱动
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;bu-zou-2-pei-zhi-qu-dong-de-ju-ti-xing-wei-git-config&quot;&gt;步骤2：配置驱动的具体行为（&lt;code&gt;git config&lt;&#x2F;code&gt;）&lt;&#x2F;h4&gt;
+&lt;p&gt;通过 &lt;code&gt;git config&lt;&#x2F;code&gt; 定义驱动的执行逻辑，格式：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;git config &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fa5c4b;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fe8019;&quot;&gt;-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;global&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fa5c4b;&quot;&gt;]&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt; merge.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fa5c4b;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;驱动名称&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fa5c4b;&quot;&gt;]&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;.driver &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;[处理命令]&amp;quot;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;--global&lt;&#x2F;code&gt; 表示全局生效（所有项目），不加则仅当前项目生效&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;san-he-bing-qu-dong-shi-li-cong-jian-dan-dao-fu-za&quot;&gt;三、合并驱动示例（从简单到复杂）&lt;&#x2F;h3&gt;
+&lt;h4 id=&quot;shi-li-1-zui-jian-dan-de-qu-dong-true-bao-liu-dang-qian-fen-zhi-ban-ben&quot;&gt;示例1：最简单的驱动（&lt;code&gt;true&lt;&#x2F;code&gt;，保留当前分支版本）&lt;&#x2F;h4&gt;
+&lt;p&gt;这是最常用的基础驱动：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;# 配置驱动：merge.ours.driver
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;git config merge.ours.driver true
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ul&gt;
+&lt;li&gt;原理：&lt;code&gt;true&lt;&#x2F;code&gt; 是一个 Unix 命令，永远返回&amp;quot;成功&amp;quot;（退出码0）&lt;&#x2F;li&gt;
+&lt;li&gt;效果：合并时&lt;strong&gt;无条件保留当前分支的文件版本&lt;&#x2F;strong&gt;，忽略源分支的变更&lt;&#x2F;li&gt;
+&lt;li&gt;适用场景：个人配置文件（如 &lt;code&gt;personal.env&lt;&#x2F;code&gt;），合并到公共分支时始终用公共版本&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;在 &lt;code&gt;.gitattributes&lt;&#x2F;code&gt; 中配合使用：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;config&#x2F;personal.env merge=ours
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;shi-li-2-bao-liu-yuan-fen-zhi-ban-ben-fu-gai-dang-qian-fen-zhi&quot;&gt;示例2：保留源分支版本（覆盖当前分支）&lt;&#x2F;h4&gt;
+&lt;p&gt;与示例1相反，强制使用源分支的文件版本：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;# 定义 &amp;quot;take-theirs&amp;quot; 驱动
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;git config merge.take-theirs.driver &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;cp %B %A&amp;quot;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ul&gt;
+&lt;li&gt;命令解释：
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;%B&lt;&#x2F;code&gt;：表示源分支（被合并的分支，如 &lt;code&gt;dev-personal&lt;&#x2F;code&gt;）的文件版本&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;%A&lt;&#x2F;code&gt;：表示当前分支（合并到的分支，如 &lt;code&gt;dev&lt;&#x2F;code&gt;）的文件版本&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;cp %B %A&lt;&#x2F;code&gt;：将源分支的文件复制到当前分支，覆盖当前版本&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;适用场景：某些必须以个人分支版本为准的配置文件&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;在 &lt;code&gt;.gitattributes&lt;&#x2F;code&gt; 中使用：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;config&#x2F;force-personal.json merge=take-theirs
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;shi-li-3-zi-ding-yi-jiao-ben-qu-dong-tiao-jian-he-bing&quot;&gt;示例3：自定义脚本驱动（条件合并）&lt;&#x2F;h4&gt;
+&lt;p&gt;更灵活的方式是编写脚本，根据文件内容决定合并策略。例如：合并时保留双方的注释，但以当前分支的配置值为准。&lt;&#x2F;p&gt;
+&lt;h5 id=&quot;bu-zou-1-chuang-jian-he-bing-jiao-ben-merge-config-sh&quot;&gt;步骤1：创建合并脚本（&lt;code&gt;merge-config.sh&lt;&#x2F;code&gt;）&lt;&#x2F;h5&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;#!&#x2F;bin&#x2F;bash
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;# 参数说明：
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;# $1: 当前分支的文件路径（%A）
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;# $2: 共同祖先的文件路径（%O）
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;# $3: 源分支的文件路径（%B）
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;# 保留当前分支的配置值，但合并源分支的注释（假设注释以#开头）
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;# 1. 提取当前分支的配置（非注释行）
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;grep -v &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;#39;^#&amp;#39; &amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fe8019;&quot;&gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;.tmp&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;# 2. 追加源分支的注释（只保留注释行）
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;grep &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;#39;^#&amp;#39; &amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;3&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fe8019;&quot;&gt;&amp;gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;.tmp&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;# 3. 替换原文件
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;mv &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;.tmp&amp;quot; &amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;# 必须返回0表示成功
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fabd2f;&quot;&gt;exit&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt; 0
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h5 id=&quot;bu-zou-2-fu-yu-zhi-xing-quan-xian&quot;&gt;步骤2：赋予执行权限&lt;&#x2F;h5&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;chmod +x merge-config.sh
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h5 id=&quot;bu-zou-3-pei-zhi-qu-dong-guan-lian-jiao-ben&quot;&gt;步骤3：配置驱动关联脚本&lt;&#x2F;h5&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;# 注意脚本路径需使用绝对路径
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;git config merge.smart-config.driver \
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;$(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;pwd&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;)&#x2F;merge-config.sh %A %O %B&amp;quot;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h5 id=&quot;bu-zou-4-zai-gitattributes-zhong-ying-yong&quot;&gt;步骤4：在 &lt;code&gt;.gitattributes&lt;&#x2F;code&gt; 中应用&lt;&#x2F;h5&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;config&#x2F;mixed.conf merge=smart-config
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ul&gt;
+&lt;li&gt;效果：合并时自动保留当前分支的配置值，同时合并源分支的注释&lt;&#x2F;li&gt;
+&lt;li&gt;适用场景：需要部分保留双方内容的复杂配置文件&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h4 id=&quot;shi-li-4-chong-tu-shi-ti-shi-shou-dong-chu-li-zeng-qiang-ban-mo-ren-xing-wei&quot;&gt;示例4：冲突时提示手动处理（增强版默认行为）&lt;&#x2F;h4&gt;
+&lt;p&gt;默认情况下，Git 会在冲突文件中插入 &lt;code&gt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&lt;&#x2F;code&gt; 标记。可以自定义提示信息：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;git config merge.prompt-conflict.driver \
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;#39;if ! diff -q %A %B &amp;gt;&#x2F;dev&#x2F;null; then echo &amp;quot;⚠️ 请手动合并 %A&amp;quot;; exit 1; else exit 0; fi&amp;#39;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ul&gt;
+&lt;li&gt;命令解释：
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;diff -q %A %B&lt;&#x2F;code&gt;：检查两个版本是否有差异&lt;&#x2F;li&gt;
+&lt;li&gt;若有差异（冲突），则输出提示并返回非0（让 Git 标记为冲突）&lt;&#x2F;li&gt;
+&lt;li&gt;若无差异，直接成功&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;适用场景：重要配置文件，不允许自动合并，必须人工确认&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;si-cha-kan-yu-shan-chu-yi-pei-zhi-de-qu-dong&quot;&gt;四、查看与删除已配置的驱动&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;# 查看所有合并驱动
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;git config --list &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fe8019;&quot;&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;grep merge.
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;# 删除某个驱动
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;git config --unset merge.ours.driver
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;wu-zong-jie&quot;&gt;五、总结&lt;&#x2F;h3&gt;
+&lt;p&gt;合并驱动的核心价值是&lt;strong&gt;自动化处理特定文件的合并规则&lt;&#x2F;strong&gt;，避免重复的手动操作：&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;简单场景用 &lt;code&gt;true&lt;&#x2F;code&gt; 或 &lt;code&gt;cp %B %A&lt;&#x2F;code&gt; 即可满足需求&lt;&#x2F;li&gt;
+&lt;li&gt;复杂场景（如条件合并、内容提取）可以通过脚本实现&lt;&#x2F;li&gt;
+&lt;li&gt;配合 &lt;code&gt;.gitattributes&lt;&#x2F;code&gt; 精确控制哪些文件应用规则&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+        
+    </entry>
+</feed>

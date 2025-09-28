@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>从 gff 到 gggenes 绘制基因结构图 - 冰龙圣土</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap">
+  <link rel="stylesheet" href="https://flyingicedragon.github.io/assets/css/custom.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css"><link rel="apple-touch-icon" sizes="180x180" href="https://flyingicedragon.github.io/images/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://flyingicedragon.github.io/images/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://flyingicedragon.github.io/images/favicon/favicon-16x16.png">
+    <link rel="manifest" href="https://flyingicedragon.github.io/images/favicon/site.webmanifest">
+    <link rel="mask-icon" href="https://flyingicedragon.github.io/images/favicon/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#2d89ef">
+    <meta name="theme-color" content="#ffffff"><link rel="canonical" href="https://flyingicedragon.github.io/blog/cong-gffdao-gggeneshui-zhi-ji-yin-jie-gou-tu/" /><link rel="alternate" type="application/atom+xml"
+        title="RSS" href="https://flyingicedragon.github.io/atom.xml"
+      ><meta name="author" content="icedragon"><meta property="article:published_time" content='2024-06-12' /><meta name="keywords" content="bioinformatics,visualization,R,Python,"><meta name="generator" content="Zola">
+  <meta property="og:title" content="从 gff 到 gggenes 绘制基因结构图" />
+  <meta property="og:url" content="https://flyingicedragon.github.io/blog/cong-gffdao-gggeneshui-zhi-ji-yin-jie-gou-tu/" /><meta property="og:site_name" content="冰龙圣土" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta name="twitter:card" content="summary" /><meta name="twitter:creator" content="@user" /><meta name="google-site-verification" content="0123457890abcdefg" />
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-0123456789"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-0123456789');
+    </script>
+</head>
+<body>
+  <div class="container-fluid vh-100">
+    <div class="row h-100"><div
+    class="sidebar d-none d-lg-block col-lg-3 col-xl-2 mh-100 p-0 overflow-auto"
+  >
+    <aside class="d-flex flex-column justify-content-between h-100">
+      <div class="d-none d-md-block mb-4 pt-5 px-4 text-center">
+        <div class="sidebar-avatar mb-2 mx-auto border border-3 rounded-circle">
+          <a href="https://flyingicedragon.github.io/" target="_blank" rel="noopener noreferrer">
+    <img
+      src="https://flyingicedragon.github.io/images/avatar.png"
+      alt="icedragon"
+      class="img-fluid"
+    >
+  </a>
+        </div>
+        <div class="mb-1">
+          <a
+            href="https://flyingicedragon.github.io/"
+            class="sidebar-title fs-5 fw-bold text-decoration-none"
+          >
+            冰龙圣土
+          </a>
+        </div>
+        <div class="fw-light">
+          飞舞的冰龙的个人空间
+        </div>
+      </div>
+
+      <div class="sidebar-nav list-group my-auto rounded-0 text-center"><a
+        href="https://flyingicedragon.github.io/"
+        class="sidebar-nav-item list-group-item list-group-item-action border border-0"
+        data-bs-toggle="tooltip" data-bs-title="Home"
+      >
+        <span class="sidebar-nav-icon bi bi-house d-none fs-4"></span>
+        <span class="sidebar-nav-text d-none d-md-inline">
+          Home
+        </span>
+      </a><a
+        href="https://flyingicedragon.github.io/blog/"
+        class="sidebar-nav-item list-group-item list-group-item-action border border-0"
+        data-bs-toggle="tooltip" data-bs-title="Blog"
+      >
+        <span class="sidebar-nav-icon bi bi-file-earmark-text d-none fs-4"></span>
+        <span class="sidebar-nav-text d-none d-md-inline">
+          Blog
+        </span>
+      </a><a
+        href="https://flyingicedragon.github.io/"
+        class="sidebar-nav-item list-group-item list-group-item-action border border-0"
+        data-bs-toggle="tooltip" data-bs-title="About"
+      >
+        <span class="sidebar-nav-icon bi bi-question-octagon d-none fs-4"></span>
+        <span class="sidebar-nav-text d-none d-md-inline">
+          About
+        </span>
+      </a></div>
+
+      <div class="sidebar-social d-none d-md-block mt-4 pb-4 px-4">
+        <div class="container-fluid">
+          <div class="row justify-content-center">
+            <div class="col-auto px-2">
+        <a
+          href="mailto:flyingicedragon@outlook.com"
+          target="_blank" rel="noopener noreferrer"
+          data-bs-toggle="tooltip"
+          data-bs-title='Email'
+          class="text-decoration-none"
+        >
+          <span class="bi bi-envelope-fill"></span>
+        </a>
+      </div><div class="col-auto px-2">
+        <a
+          href="https://github.com/flyingicedragon"
+          target="_blank" rel="noopener noreferrer"
+          data-bs-toggle="tooltip"
+          data-bs-title='GitHub'
+          class="text-decoration-none"
+        >
+          <span class="bi bi-github"></span>
+        </a>
+      </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div><div class="col mh-100 overflow-auto px-0"><nav
+    class="navbar navbar-expand navbar-bg-light sticky-top border-bottom"
+  >
+    <div class="container-fluid"><button
+        type="button"
+        class="btn d-block d-lg-none fs-5"
+        data-bs-toggle="offcanvas" data-bs-target="#offcanvas"
+        aria-controls="offcanvas"
+      >
+        <span class="bi bi-list"></span>
+      </button>
+      
+      <div class="col-8">
+        
+          <div class="row justify-content-center justify-content-lg-start p-2 ps-xl-3 text-center"><div class="col-auto d-none d-xl-block">
+        <a
+          href="https://flyingicedragon.github.io/blog/"
+          class="text-decoration-none"
+        >
+          Blog
+        </a>
+      </div>
+      <div class="col-auto d-none d-xl-block">
+        <span class="text-secondary">
+          »
+        </span>
+      </div><div class="col-auto">
+      <span
+        class="d-inline d-sm-none text-secondary"
+        data-bs-toggle="tooltip"
+        data-bs-title="从 gff 到 gggenes 绘制基因结构图"
+      >
+        从 gff 到 gggenes …
+      </span>
+      <span
+        class="d-none d-sm-inline text-secondary"
+        data-bs-toggle="tooltip"
+        data-bs-title="从 gff 到 gggenes 绘制基因结构图"
+      >
+        从 gff 到 gggenes 绘制基因结构图
+      </span>
+    </div>
+  </div>
+        
+      </div>
+
+      <button
+    type="button" data-bs-toggle="modal" data-bs-target="#searchModal"
+    class="btn border border-0"
+  >
+    <span class="bi bi-search fs-5"></span>
+  </button>
+    </div>
+  </nav><div class="d-flex flex-column h-100"><main class="container">
+    <div class="row justify-content-center mt-5">
+      <div class="col-11 col-lg-10 col-xxl-9">
+        <h1 class="mb-3">
+          从 gff 到 gggenes 绘制基因结构图
+        </h1>
+        <div class="row mt-3 mb-2">
+          <div class="col-auto">
+            <small class="text-muted">
+              By:
+              <a
+                href="https://flyingicedragon.github.io/"
+                target="_blank" rel="noopener noreferrer"
+                class="text-decoration-none"
+              >
+                icedragon
+              </a>
+            </small>
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-auto mb-2">
+            <small class="text-muted">
+              Posted:
+              <time datetime="2024-06-12">
+                <a 
+                  href="#" data-bs-toggle="tooltip"
+                  data-bs-title="Wednesday, June 12, 2024 12:00:00 AM UTC"
+                  class="text-muted text-decoration-none"
+                >
+                  June 12, 2024
+                </a>
+              </time>
+            </small>
+          </div>
+          
+        </div><div class="mb-5">
+          <p><code>gffutils</code> 是一个用来解析 gff 文件的 Python 包，可以十分方便地获取 gff 文件中的相关信息。<code>gggenes</code> 是 <code>ggplot2</code> 的扩展包，用于绘制基因结构图、多物种基因比较图的很好玩的工具。两个工具联用可以实现从 gff 数据获取到基因结构图绘制的全过程。</p>
+<h2 id="dui-gff-yuan-shi-shu-ju-jin-xing-chu-li">对 gff 原始数据进行处理</h2>
+<h3 id="an-zhuang-gff2gggenes">安装 gff2gggenes</h3>
+<p>建议使用<code>pipx</code>进行安装，也可以使用<code>pip</code>。</p>
+<pre data-lang="shell" style="background-color:#282828;color:#fdf4c1aa;" class="language-shell "><code class="language-shell" data-lang="shell"><span># from github
+</span><span>pipx install git+https://github.com/flyingicedragon/gff2gggenes.git
+</span><span># or from gitee
+</span><span>pipx install git+https://gitee.com/flyingicedragon/gff2gggenes.git
+</span></code></pre>
+<h3 id="gff-wen-jian-yu-chu-li">GFF 文件预处理</h3>
+<p>对 GFF 文件进行预处理，截取仅包含所需基因的 GFF 内容。建议在 Linux 中使用 <code>sed</code> 命令完成。</p>
+<h3 id="cheng-xu-diao-yong">程序调用</h3>
+<pre data-lang="shell" style="background-color:#282828;color:#fdf4c1aa;" class="language-shell "><code class="language-shell" data-lang="shell"><span>gff2gggenes --help
+</span><span>gff2gggenes test.gff
+</span><span>gff2gggenes test.gff --sub
+</span></code></pre>
+<p>不添加 <code>--sub</code> 参数，表示将各基因的情况进行输出；添加 <code>--sub</code> 参数，表示输出各基因子区域（例如：mRNA、CDS等，与 gff 文件内容有关）。</p>
+<h3 id="jie-guo-shu-chu">结果输出</h3>
+<p>CSV 文件输出到工作路径中，文件名结尾是“_gene.csv”或者“_subgene.csv”。</p>
+<h2 id="li-yong-r-bao-gggenes-jin-xing-ke-shi-hua">利用 R 包 gggenes 进行可视化</h2>
+<p>gggenes 文档链接：<a rel="noopener nofollow noreferrer" target="_blank" href="https://wilkox.org/gggenes/">https://wilkox.org/gggenes/</a></p>
+<h3 id="gggene-an-zhuang">gggene 安装</h3>
+<p>直接从 CRAN 安装：</p>
+<pre data-lang="R" style="background-color:#282828;color:#fdf4c1aa;" class="language-R "><code class="language-R" data-lang="R"><span style="color:#fabd2f;">install.packages</span><span style="color:#fdf4c1;">(</span><span style="color:#b8bb26;">&quot;gggenes&quot;</span><span style="color:#fdf4c1;">)
+</span></code></pre>
+<p>如果使用 rstudio 进行 R 工作，也可以在 package 中安装。
+<img src="https://flyingicedragon.github.io/blog/cong-gffdao-gggeneshui-zhi-ji-yin-jie-gou-tu/rstudio.jpg" alt="rstudio.png" /></p>
+<h3 id="qi-yong-ggplot2-he-gggene">启用 ggplot2 和 gggene</h3>
+<p>可以在 rstudio 的包管理工具中开启，也可以使用以下代码：</p>
+<pre data-lang="R" style="background-color:#282828;color:#fdf4c1aa;" class="language-R "><code class="language-R" data-lang="R"><span style="color:#fabd2f;">library</span><span style="color:#fdf4c1;">(ggplot2)
+</span><span style="color:#fabd2f;">library</span><span style="color:#fdf4c1;">(gggenes)
+</span></code></pre>
+<h3 id="dao-ru-python-cheng-xu-sheng-cheng-de-csv-shu-ju">导入 python 程序生成的 csv 数据</h3>
+<pre data-lang="R" style="background-color:#282828;color:#fdf4c1aa;" class="language-R "><code class="language-R" data-lang="R"><span>geneData </span><span style="color:#fe8019;">= </span><span style="color:#fabd2f;">read.csv</span><span style="color:#fdf4c1;">(</span><span style="color:#b8bb26;">&#39;gene.csv&#39;</span><span style="color:#fdf4c1;">)
+</span></code></pre>
+<h3 id="yong-geom-gene-arrow-hua-ji-yin-jian-tou">用geom_gene_arrow()画基因箭头</h3>
+<pre data-lang="R" style="background-color:#282828;color:#fdf4c1aa;" class="language-R "><code class="language-R" data-lang="R"><span style="color:#fdf4c1;">ggplot(geneData, aes(xmin </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> start, xmax </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> end, y </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> molecule, fill </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> gene)) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">geom_gene_arrow() </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">facet_wrap(</span><span style="color:#fa5c4b;">~</span><span style="color:#fdf4c1;"> molecule, scales </span><span style="color:#fe8019;">= </span><span style="color:#b8bb26;">&quot;free&quot;</span><span style="color:#fdf4c1;">, ncol </span><span style="color:#fe8019;">= </span><span style="color:#d3869b;">1</span><span style="color:#fdf4c1;">) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">scale_fill_brewer(palette </span><span style="color:#fe8019;">= </span><span style="color:#b8bb26;">&quot;Set3&quot;</span><span style="color:#fdf4c1;">)
+</span></code></pre>
+<h3 id="ke-xuan-yong-theme-genes-mei-hua-tu-xing">（可选）用 <code>theme_genes</code> 美化图形</h3>
+<p>默认的图形不太美观，可以使用自带的 <code>theme_genes()</code> 进行美化。</p>
+<pre data-lang="R" style="background-color:#282828;color:#fdf4c1aa;" class="language-R "><code class="language-R" data-lang="R"><span style="color:#fdf4c1;">ggplot(geneData, aes(xmin </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> start, xmax </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> end, y </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> molecule, fill </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> gene)) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">geom_gene_arrow() </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">facet_wrap(</span><span style="color:#fa5c4b;">~</span><span style="color:#fdf4c1;"> molecule, scales </span><span style="color:#fe8019;">= </span><span style="color:#b8bb26;">&quot;free&quot;</span><span style="color:#fdf4c1;">, ncol </span><span style="color:#fe8019;">= </span><span style="color:#d3869b;">1</span><span style="color:#fdf4c1;">) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">scale_fill_brewer(palette </span><span style="color:#fe8019;">= </span><span style="color:#b8bb26;">&quot;Set3&quot;</span><span style="color:#fdf4c1;">) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">theme_genes()
+</span></code></pre>
+<h3 id="shi-yong-make-alignment-dummies-kua-mian-dui-qi-ji-yin">使用 <code>make_alignment_dummies()</code> 跨面对齐基因</h3>
+<p>可以选择一个基因将所有数据进行对齐，在比较基因组时会用到。</p>
+<pre data-lang="R" style="background-color:#282828;color:#fdf4c1aa;" class="language-R "><code class="language-R" data-lang="R"><span>dummies </span><span style="color:#fe8019;">&lt;- </span><span style="color:#fdf4c1;">make_alignment_dummies(
+</span><span style="color:#fdf4c1;">  geneData,
+</span><span style="color:#fdf4c1;">  aes(xmin </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> start, xmax </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> end, y </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> molecule, id </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> gene),
+</span><span style="color:#fdf4c1;">  on </span><span style="color:#fe8019;">= </span><span style="color:#b8bb26;">&quot;geneX&quot;
+</span><span style="color:#fdf4c1;">)
+</span><span>
+</span><span style="color:#fdf4c1;">ggplot(geneData, aes(xmin </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> start, xmax </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> end, y </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> molecule, fill </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> gene)) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">geom_gene_arrow() </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">geom_blank(data </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> dummies) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">facet_wrap(</span><span style="color:#fa5c4b;">~</span><span style="color:#fdf4c1;"> molecule, scales </span><span style="color:#fe8019;">= </span><span style="color:#b8bb26;">&quot;free&quot;</span><span style="color:#fdf4c1;">, ncol </span><span style="color:#fe8019;">= </span><span style="color:#d3869b;">1</span><span style="color:#fdf4c1;">) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">scale_fill_brewer(palette </span><span style="color:#fe8019;">= </span><span style="color:#b8bb26;">&quot;Set3&quot;</span><span style="color:#fdf4c1;">) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">theme_genes()
+</span></code></pre>
+<h3 id="yong-geom-gene-label-biao-ji-ji-yin">用 <code>geom_gene_label()</code> 标记基因</h3>
+<p><code>geom_gene_label()</code> 可以将标签文本放入基因箭头内，需要把基因名字所在的列名字映射到 <code>label</code> 属性。依赖于 <code>ggfittext</code> 包。</p>
+<pre data-lang="R" style="background-color:#282828;color:#fdf4c1aa;" class="language-R "><code class="language-R" data-lang="R"><span style="color:#fdf4c1;">ggplot(
+</span><span style="color:#fdf4c1;">    geneData,
+</span><span style="color:#fdf4c1;">    aes(xmin </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> start, xmax </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> end, y </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> molecule, fill </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> gene, label </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> gene)
+</span><span style="color:#fdf4c1;">  ) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">geom_gene_arrow(arrowhead_height </span><span style="color:#fe8019;">= </span><span style="color:#fdf4c1;">unit(</span><span style="color:#d3869b;">3</span><span style="color:#fdf4c1;">, </span><span style="color:#b8bb26;">&quot;mm&quot;</span><span style="color:#fdf4c1;">), arrowhead_width </span><span style="color:#fe8019;">= </span><span style="color:#fdf4c1;">unit(</span><span style="color:#d3869b;">1</span><span style="color:#fdf4c1;">, </span><span style="color:#b8bb26;">&quot;mm&quot;</span><span style="color:#fdf4c1;">)) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">geom_gene_label(align </span><span style="color:#fe8019;">= </span><span style="color:#b8bb26;">&quot;left&quot;</span><span style="color:#fdf4c1;">) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">geom_blank(data </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> dummies) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">facet_wrap(</span><span style="color:#fa5c4b;">~</span><span style="color:#fdf4c1;"> molecule, scales </span><span style="color:#fe8019;">= </span><span style="color:#b8bb26;">&quot;free&quot;</span><span style="color:#fdf4c1;">, ncol </span><span style="color:#fe8019;">= </span><span style="color:#d3869b;">1</span><span style="color:#fdf4c1;">) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">scale_fill_brewer(palette </span><span style="color:#fe8019;">= </span><span style="color:#b8bb26;">&quot;Set3&quot;</span><span style="color:#fdf4c1;">) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">theme_genes()
+</span></code></pre>
+<h3 id="cha-kan-ji-yin-zi-pian-duan-subgene">查看基因子片段（subgene）</h3>
+<p>可以使用 <code>geom_subgene_arrow()</code> 突出显示子基因片段。此时，需要多调用另一个 csv 文件。</p>
+<pre data-lang="R" style="background-color:#282828;color:#fdf4c1aa;" class="language-R "><code class="language-R" data-lang="R"><span>subGeneData </span><span style="color:#fe8019;">= </span><span style="color:#fabd2f;">read.csv</span><span style="color:#fdf4c1;">(</span><span style="color:#b8bb26;">&#39;subGene.csv&#39;</span><span style="color:#fdf4c1;">)
+</span><span style="color:#fdf4c1;">ggplot(geneData, aes(xmin </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> start, xmax </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> end, y </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> molecule)) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">facet_wrap(</span><span style="color:#fa5c4b;">~</span><span style="color:#fdf4c1;"> molecule, scales </span><span style="color:#fe8019;">= </span><span style="color:#b8bb26;">&quot;free&quot;</span><span style="color:#fdf4c1;">, ncol </span><span style="color:#fe8019;">= </span><span style="color:#d3869b;">1</span><span style="color:#fdf4c1;">) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">geom_gene_arrow(fill </span><span style="color:#fe8019;">= </span><span style="color:#b8bb26;">&quot;white&quot;</span><span style="color:#fdf4c1;">) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">geom_subgene_arrow(data </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> subGeneData,
+</span><span style="color:#fdf4c1;">    aes(xmin </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> start, xmax </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> end, y </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> molecule, fill </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> gene,
+</span><span style="color:#fdf4c1;">        xsubmin </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> from, xsubmax </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> to), color</span><span style="color:#fe8019;">=</span><span style="color:#b8bb26;">&quot;black&quot;</span><span style="color:#fdf4c1;">, alpha</span><span style="color:#fe8019;">=</span><span style="color:#d3869b;">.7</span><span style="color:#fdf4c1;">) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">theme_genes()
+</span></code></pre>
+<p>同时，也可以为基因子片段添加标签。</p>
+<pre data-lang="R" style="background-color:#282828;color:#fdf4c1aa;" class="language-R "><code class="language-R" data-lang="R"><span style="color:#fdf4c1;">ggplot(geneData, aes(xmin </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> start, xmax </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> end, y </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> strand)
+</span><span style="color:#fdf4c1;">  ) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">geom_gene_arrow() </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">geom_gene_label(aes(label </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> gene)) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">geom_subgene_arrow(
+</span><span style="color:#fdf4c1;">    data </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> subGeneData, aes(xsubmin </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> from, xsubmax </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> to, fill </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> subgene)
+</span><span style="color:#fdf4c1;">  ) </span><span style="color:#fe8019;">+
+</span><span>  </span><span style="color:#fdf4c1;">geom_subgene_label(
+</span><span style="color:#fdf4c1;">    data </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> subGeneData, aes(xsubmin </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> from, xsubmax </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> to, label </span><span style="color:#fe8019;">=</span><span style="color:#fdf4c1;"> subgene),
+</span><span style="color:#fdf4c1;">    min.size </span><span style="color:#fe8019;">= </span><span style="color:#d3869b;">0
+</span><span style="color:#fdf4c1;">  )
+</span></code></pre>
+
+        </div>
+        
+          <div class="row my-1">
+            <div class="col-auto">
+              <span class="bi bi-bookmarks fs-6 me-1"></span>
+              
+    <a
+      href="https://flyingicedragon.github.io/categories/technology/"
+      class="btn btn-taxonomy btn-sm m-1 border text-decoration-none"
+    >
+      <small>
+        technology
+      </small>
+    </a>
+  
+            </div>
+          </div>
+        
+        
+          <div class="row mt-1 mb-3">
+            <div class="col-auto">
+              <span class="bi bi-tags fs-6 me-1"></span>
+              
+    <a
+      href="https://flyingicedragon.github.io/tags/bioinformatics/"
+      class="btn btn-taxonomy btn-sm m-1 border text-decoration-none"
+    >
+      <small>
+        bioinformatics
+      </small>
+    </a>
+  
+    <a
+      href="https://flyingicedragon.github.io/tags/visualization/"
+      class="btn btn-taxonomy btn-sm m-1 border text-decoration-none"
+    >
+      <small>
+        visualization
+      </small>
+    </a>
+  
+    <a
+      href="https://flyingicedragon.github.io/tags/r/"
+      class="btn btn-taxonomy btn-sm m-1 border text-decoration-none"
+    >
+      <small>
+        R
+      </small>
+    </a>
+  
+    <a
+      href="https://flyingicedragon.github.io/tags/python/"
+      class="btn btn-taxonomy btn-sm m-1 border text-decoration-none"
+    >
+      <small>
+        Python
+      </small>
+    </a>
+  
+            </div>
+          </div>
+        
+      </div>
+    </div>
+  </main><div class="container">
+    <div class="row justify-content-center mt-3 mb-4">
+      <div class="col-11 col-lg-10 col-xxl-9"></div>
+    </div>
+  </div><footer class="container-fluid mt-auto">
+    <div class="row justify-content-center">
+      <div class="col-10">
+        <div class="row pt-3 pb-4 border-top">
+          <div class="col-12 col-md-6 mb-2 mb-md-0 text-center text-md-start">
+            <small class="text-secondary">
+              © 2025
+              <a 
+                href="https://flyingicedragon.github.io/"
+                target="_blank" rel="noopener noreferrer"
+                class="text-decoration-none"
+              >
+                icedragon&period;
+              </a>
+              <a
+                href="https://creativecommons.org/licenses/by/4.0/"
+                data-bs-toggle="tooltip"
+                data-bs-title="Except where otherwise noted, the blog posts on this site are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) License by the author."
+                class="text-secondary text-decoration-none"
+              >
+                Some rights reserved.
+              </a>
+            </small>
+          </div>
+          <div class="col-12 col-md-6 text-center text-md-end">
+            <small class="text-secondary">
+              Powered by
+              <a 
+                href="https://www.getzola.org/"
+                target="_blank" rel="noopener noreferrer"
+                class="text-decoration-none"
+              >
+                Zola
+              </a>
+              with
+              <a 
+                href="https://github.com/gersonbdev/ataraxia-zola"
+                target="_blank" rel="noopener noreferrer"
+                class="text-decoration-none"
+              >
+                Ataraxia
+              </a>
+              theme.
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvas" aria-labelledby="offcanvasLabel">
+    <div class="offcanvas-body p-0">
+      <div class="sidebar container-fluid vh-100">
+        <div class="row h-100">
+          <div
+            class="col mh-100 px-0 overflow-auto"
+          >
+            <aside class="d-flex flex-column justify-content-between h-100">
+              <div class="mb-4 pt-5 px-3 text-center">
+                <div class="sidebar-avatar mb-2 mx-auto border border-3 rounded-circle">
+                  <a href="https://flyingicedragon.github.io/" target="_blank" rel="noopener noreferrer">
+    <img
+      src="https://flyingicedragon.github.io/images/avatar.png"
+      alt="icedragon"
+      class="img-fluid"
+    >
+  </a>
+                </div>
+                <div>
+                  <a
+                    href="https://flyingicedragon.github.io/"
+                    class="sidebar-title fs-5 fw-bold text-decoration-none"
+                  >
+                    冰龙圣土
+                  </a>
+                </div>
+              </div>
+
+              <div class="sidebar-nav list-group my-auto rounded-0 text-start"><a
+        href="https://flyingicedragon.github.io/"
+        class="sidebar-nav-item list-group-item list-group-item-action border border-0"
+        data-bs-toggle="tooltip" data-bs-title="Home"
+      >
+        <span class="sidebar-nav-icon bi bi-house ms-2 me-1 fs-4"></span>
+        <span class="sidebar-nav-text">Home</span>
+      </a><a
+        href="https://flyingicedragon.github.io/blog/"
+        class="sidebar-nav-item list-group-item list-group-item-action border border-0"
+        data-bs-toggle="tooltip" data-bs-title="Blog"
+      >
+        <span class="sidebar-nav-icon bi bi-file-earmark-text ms-2 me-1 fs-4"></span>
+        <span class="sidebar-nav-text">Blog</span>
+      </a><a
+        href="https://flyingicedragon.github.io/"
+        class="sidebar-nav-item list-group-item list-group-item-action border border-0"
+        data-bs-toggle="tooltip" data-bs-title="About"
+      >
+        <span class="sidebar-nav-icon bi bi-question-octagon ms-2 me-1 fs-4"></span>
+        <span class="sidebar-nav-text">About</span>
+      </a></div>
+
+              <div class="sidebar-social mt-4 pb-4 px-3">
+                <div class="container-fluid">
+                  <div class="row justify-content-center">
+                    <div class="col-auto px-2">
+        <a
+          href="mailto:flyingicedragon@outlook.com"
+          target="_blank" rel="noopener noreferrer"
+          data-bs-toggle="tooltip"
+          data-bs-title='Email'
+          class="text-decoration-none"
+        >
+          <span class="bi bi-envelope-fill"></span>
+        </a>
+      </div><div class="col-auto px-2">
+        <a
+          href="https://github.com/flyingicedragon"
+          target="_blank" rel="noopener noreferrer"
+          data-bs-toggle="tooltip"
+          data-bs-title='GitHub'
+          class="text-decoration-none"
+        >
+          <span class="bi bi-github"></span>
+        </a>
+      </div>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="searchModalLabel">
+          搜索
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div
+          id="searchInput" role="search" 
+          class="d-flex mb-3 border rounded-5 bg-white"
+        >
+          <input
+            id="search" type="search"
+            class="form-control border border-0 rounded-5 rounded-end"
+            placeholder="搜索"
+            aria-label="搜索"
+          >
+          <div class="rounded-5 rounded-start py-2 ps-2 pe-3">
+            <span class="bi bi-search"></span>
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  <script src="https://flyingicedragon.github.io/assets/js/bootstrap/bootstrap.bundle.min.js"></script>
+  <script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    const myModal = document.getElementById('searchModal');
+    const myInput = document.getElementById('searchInput');
+
+    myModal.addEventListener('shown.bs.modal', () => {
+      myInput.focus()
+    });
+  </script>
+  <script src="https://flyingicedragon.github.io/elasticlunr.min.js"></script>
+  <script src="https://flyingicedragon.github.io/search_index.zh.js"></script><script src="https://flyingicedragon.github.io/assets/js/search/lunr.stemmer.support.min.js"></script>
+    <script src="https://flyingicedragon.github.io/assets/js/search/lunr.zh.min.js"></script><script src="https://flyingicedragon.github.io/assets/js/search/search.js"></script>
+</body>
+</html>

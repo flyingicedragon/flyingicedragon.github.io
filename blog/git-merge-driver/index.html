@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>git merge driver简介 - 冰龙圣土</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap">
+  <link rel="stylesheet" href="https://flyingicedragon.github.io/assets/css/custom.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css"><link rel="apple-touch-icon" sizes="180x180" href="https://flyingicedragon.github.io/images/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://flyingicedragon.github.io/images/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://flyingicedragon.github.io/images/favicon/favicon-16x16.png">
+    <link rel="manifest" href="https://flyingicedragon.github.io/images/favicon/site.webmanifest">
+    <link rel="mask-icon" href="https://flyingicedragon.github.io/images/favicon/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#2d89ef">
+    <meta name="theme-color" content="#ffffff"><link rel="canonical" href="https://flyingicedragon.github.io/blog/git-merge-driver/" /><link rel="alternate" type="application/atom+xml"
+        title="RSS" href="https://flyingicedragon.github.io/atom.xml"
+      ><meta name="author" content="icedragon"><meta property="article:published_time" content='2025-09-26' /><meta name="keywords" content="git,"><meta name="generator" content="Zola">
+  <meta property="og:title" content="git merge driver简介" />
+  <meta property="og:url" content="https://flyingicedragon.github.io/blog/git-merge-driver/" /><meta property="og:site_name" content="冰龙圣土" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta name="twitter:card" content="summary" /><meta name="twitter:creator" content="@user" /><meta name="google-site-verification" content="0123457890abcdefg" />
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-0123456789"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-0123456789');
+    </script>
+</head>
+<body>
+  <div class="container-fluid vh-100">
+    <div class="row h-100"><div
+    class="sidebar d-none d-lg-block col-lg-3 col-xl-2 mh-100 p-0 overflow-auto"
+  >
+    <aside class="d-flex flex-column justify-content-between h-100">
+      <div class="d-none d-md-block mb-4 pt-5 px-4 text-center">
+        <div class="sidebar-avatar mb-2 mx-auto border border-3 rounded-circle">
+          <a href="https://flyingicedragon.github.io/" target="_blank" rel="noopener noreferrer">
+    <img
+      src="https://flyingicedragon.github.io/images/avatar.png"
+      alt="icedragon"
+      class="img-fluid"
+    >
+  </a>
+        </div>
+        <div class="mb-1">
+          <a
+            href="https://flyingicedragon.github.io/"
+            class="sidebar-title fs-5 fw-bold text-decoration-none"
+          >
+            冰龙圣土
+          </a>
+        </div>
+        <div class="fw-light">
+          飞舞的冰龙的个人空间
+        </div>
+      </div>
+
+      <div class="sidebar-nav list-group my-auto rounded-0 text-center"><a
+        href="https://flyingicedragon.github.io/"
+        class="sidebar-nav-item list-group-item list-group-item-action border border-0"
+        data-bs-toggle="tooltip" data-bs-title="Home"
+      >
+        <span class="sidebar-nav-icon bi bi-house d-none fs-4"></span>
+        <span class="sidebar-nav-text d-none d-md-inline">
+          Home
+        </span>
+      </a><a
+        href="https://flyingicedragon.github.io/blog/"
+        class="sidebar-nav-item list-group-item list-group-item-action border border-0"
+        data-bs-toggle="tooltip" data-bs-title="Blog"
+      >
+        <span class="sidebar-nav-icon bi bi-file-earmark-text d-none fs-4"></span>
+        <span class="sidebar-nav-text d-none d-md-inline">
+          Blog
+        </span>
+      </a><a
+        href="https://flyingicedragon.github.io/"
+        class="sidebar-nav-item list-group-item list-group-item-action border border-0"
+        data-bs-toggle="tooltip" data-bs-title="About"
+      >
+        <span class="sidebar-nav-icon bi bi-question-octagon d-none fs-4"></span>
+        <span class="sidebar-nav-text d-none d-md-inline">
+          About
+        </span>
+      </a></div>
+
+      <div class="sidebar-social d-none d-md-block mt-4 pb-4 px-4">
+        <div class="container-fluid">
+          <div class="row justify-content-center">
+            <div class="col-auto px-2">
+        <a
+          href="mailto:flyingicedragon@outlook.com"
+          target="_blank" rel="noopener noreferrer"
+          data-bs-toggle="tooltip"
+          data-bs-title='Email'
+          class="text-decoration-none"
+        >
+          <span class="bi bi-envelope-fill"></span>
+        </a>
+      </div><div class="col-auto px-2">
+        <a
+          href="https://github.com/flyingicedragon"
+          target="_blank" rel="noopener noreferrer"
+          data-bs-toggle="tooltip"
+          data-bs-title='GitHub'
+          class="text-decoration-none"
+        >
+          <span class="bi bi-github"></span>
+        </a>
+      </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div><div class="col mh-100 overflow-auto px-0"><nav
+    class="navbar navbar-expand navbar-bg-light sticky-top border-bottom"
+  >
+    <div class="container-fluid"><button
+        type="button"
+        class="btn d-block d-lg-none fs-5"
+        data-bs-toggle="offcanvas" data-bs-target="#offcanvas"
+        aria-controls="offcanvas"
+      >
+        <span class="bi bi-list"></span>
+      </button>
+      
+      <div class="col-8">
+        
+          <div class="row justify-content-center justify-content-lg-start p-2 ps-xl-3 text-center"><div class="col-auto d-none d-xl-block">
+        <a
+          href="https://flyingicedragon.github.io/blog/"
+          class="text-decoration-none"
+        >
+          Blog
+        </a>
+      </div>
+      <div class="col-auto d-none d-xl-block">
+        <span class="text-secondary">
+          »
+        </span>
+      </div><div class="col-auto">
+      <span
+        class="d-inline d-sm-none text-secondary"
+        data-bs-toggle="tooltip"
+        data-bs-title="git merge driver简介"
+      >
+        git merge driver…
+      </span>
+      <span
+        class="d-none d-sm-inline text-secondary"
+        data-bs-toggle="tooltip"
+        data-bs-title="git merge driver简介"
+      >
+        git merge driver简介
+      </span>
+    </div>
+  </div>
+        
+      </div>
+
+      <button
+    type="button" data-bs-toggle="modal" data-bs-target="#searchModal"
+    class="btn border border-0"
+  >
+    <span class="bi bi-search fs-5"></span>
+  </button>
+    </div>
+  </nav><div class="d-flex flex-column h-100"><main class="container">
+    <div class="row justify-content-center mt-5">
+      <div class="col-11 col-lg-10 col-xxl-9">
+        <h1 class="mb-3">
+          git merge driver简介
+        </h1>
+        <div class="row mt-3 mb-2">
+          <div class="col-auto">
+            <small class="text-muted">
+              By:
+              <a
+                href="https://flyingicedragon.github.io/"
+                target="_blank" rel="noopener noreferrer"
+                class="text-decoration-none"
+              >
+                icedragon
+              </a>
+            </small>
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-auto mb-2">
+            <small class="text-muted">
+              Posted:
+              <time datetime="2025-09-26">
+                <a 
+                  href="#" data-bs-toggle="tooltip"
+                  data-bs-title="Friday, September 26, 2025 12:00:00 AM UTC"
+                  class="text-muted text-decoration-none"
+                >
+                  September 26, 2025
+                </a>
+              </time>
+            </small>
+          </div>
+          
+        </div><div class="mb-5">
+          <p>Git 的合并驱动（merge driver）是一种高级功能，允许你自定义 Git 处理文件合并冲突的方式。默认情况下，Git 会尝试自动合并文件，若冲突则标记冲突内容让用户手动解决。而合并驱动能让你编写规则，告诉 Git 如何智能处理特定文件的合并。</p>
+<h3 id="yi-he-bing-qu-dong-de-he-xin-yuan-li">一、合并驱动的核心原理</h3>
+<ol>
+<li>当 Git 合并两个分支时，会检查 <code>.gitattributes</code> 文件，查看是否有文件配置了 <code>merge=xxx</code> 规则</li>
+<li>若有，则调用名为 <code>xxx</code> 的合并驱动处理该文件</li>
+<li>驱动可以是简单的命令（如 <code>true</code>），也可以是复杂的脚本，决定最终保留哪个版本的文件</li>
+</ol>
+<h3 id="er-ji-chu-pei-zhi-bu-zou-bi-zuo">二、基础配置步骤（必做）</h3>
+<h4 id="bu-zou-1-ding-yi-wen-jian-yu-qu-dong-de-guan-lian-gitattributes">步骤1：定义文件与驱动的关联（<code>.gitattributes</code>）</h4>
+<p>在项目根目录创建 <code>.gitattributes</code> 文件，指定哪些文件使用哪个驱动：</p>
+<pre data-lang="bash" style="background-color:#282828;color:#fdf4c1aa;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="font-style:italic;color:#928374;"># 格式：[文件路径] merge=[驱动名称]
+</span><span style="color:#fdf4c1;">config/personal.env merge=ignore-personal  </span><span style="font-style:italic;color:#928374;"># 个人配置文件用自定义驱动
+</span><span style="color:#fdf4c1;">*.json merge=keep-ours  </span><span style="font-style:italic;color:#928374;"># 所有JSON文件用另一个驱动
+</span></code></pre>
+<h4 id="bu-zou-2-pei-zhi-qu-dong-de-ju-ti-xing-wei-git-config">步骤2：配置驱动的具体行为（<code>git config</code>）</h4>
+<p>通过 <code>git config</code> 定义驱动的执行逻辑，格式：</p>
+<pre data-lang="bash" style="background-color:#282828;color:#fdf4c1aa;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#fdf4c1;">git config </span><span style="color:#fa5c4b;">[</span><span style="color:#fdf4c1;">-</span><span style="color:#fe8019;">-</span><span style="color:#fdf4c1;">global</span><span style="color:#fa5c4b;">]</span><span style="color:#fdf4c1;"> merge.</span><span style="color:#fa5c4b;">[</span><span style="color:#fdf4c1;">驱动名称</span><span style="color:#fa5c4b;">]</span><span style="color:#fdf4c1;">.driver </span><span style="color:#b8bb26;">&quot;[处理命令]&quot;
+</span></code></pre>
+<ul>
+<li><code>--global</code> 表示全局生效（所有项目），不加则仅当前项目生效</li>
+</ul>
+<h3 id="san-he-bing-qu-dong-shi-li-cong-jian-dan-dao-fu-za">三、合并驱动示例（从简单到复杂）</h3>
+<h4 id="shi-li-1-zui-jian-dan-de-qu-dong-true-bao-liu-dang-qian-fen-zhi-ban-ben">示例1：最简单的驱动（<code>true</code>，保留当前分支版本）</h4>
+<p>这是最常用的基础驱动：</p>
+<pre data-lang="bash" style="background-color:#282828;color:#fdf4c1aa;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="font-style:italic;color:#928374;"># 配置驱动：merge.ours.driver
+</span><span style="color:#fdf4c1;">git config merge.ours.driver true
+</span></code></pre>
+<ul>
+<li>原理：<code>true</code> 是一个 Unix 命令，永远返回&quot;成功&quot;（退出码0）</li>
+<li>效果：合并时<strong>无条件保留当前分支的文件版本</strong>，忽略源分支的变更</li>
+<li>适用场景：个人配置文件（如 <code>personal.env</code>），合并到公共分支时始终用公共版本</li>
+</ul>
+<p>在 <code>.gitattributes</code> 中配合使用：</p>
+<pre data-lang="bash" style="background-color:#282828;color:#fdf4c1aa;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#fdf4c1;">config/personal.env merge=ours
+</span></code></pre>
+<h4 id="shi-li-2-bao-liu-yuan-fen-zhi-ban-ben-fu-gai-dang-qian-fen-zhi">示例2：保留源分支版本（覆盖当前分支）</h4>
+<p>与示例1相反，强制使用源分支的文件版本：</p>
+<pre data-lang="bash" style="background-color:#282828;color:#fdf4c1aa;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="font-style:italic;color:#928374;"># 定义 &quot;take-theirs&quot; 驱动
+</span><span style="color:#fdf4c1;">git config merge.take-theirs.driver </span><span style="color:#b8bb26;">&quot;cp %B %A&quot;
+</span></code></pre>
+<ul>
+<li>命令解释：
+<ul>
+<li><code>%B</code>：表示源分支（被合并的分支，如 <code>dev-personal</code>）的文件版本</li>
+<li><code>%A</code>：表示当前分支（合并到的分支，如 <code>dev</code>）的文件版本</li>
+<li><code>cp %B %A</code>：将源分支的文件复制到当前分支，覆盖当前版本</li>
+</ul>
+</li>
+<li>适用场景：某些必须以个人分支版本为准的配置文件</li>
+</ul>
+<p>在 <code>.gitattributes</code> 中使用：</p>
+<pre data-lang="bash" style="background-color:#282828;color:#fdf4c1aa;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#fdf4c1;">config/force-personal.json merge=take-theirs
+</span></code></pre>
+<h4 id="shi-li-3-zi-ding-yi-jiao-ben-qu-dong-tiao-jian-he-bing">示例3：自定义脚本驱动（条件合并）</h4>
+<p>更灵活的方式是编写脚本，根据文件内容决定合并策略。例如：合并时保留双方的注释，但以当前分支的配置值为准。</p>
+<h5 id="bu-zou-1-chuang-jian-he-bing-jiao-ben-merge-config-sh">步骤1：创建合并脚本（<code>merge-config.sh</code>）</h5>
+<pre data-lang="bash" style="background-color:#282828;color:#fdf4c1aa;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="font-style:italic;color:#928374;">#!/bin/bash
+</span><span>
+</span><span style="font-style:italic;color:#928374;"># 参数说明：
+</span><span style="font-style:italic;color:#928374;"># $1: 当前分支的文件路径（%A）
+</span><span style="font-style:italic;color:#928374;"># $2: 共同祖先的文件路径（%O）
+</span><span style="font-style:italic;color:#928374;"># $3: 源分支的文件路径（%B）
+</span><span>
+</span><span style="font-style:italic;color:#928374;"># 保留当前分支的配置值，但合并源分支的注释（假设注释以#开头）
+</span><span style="font-style:italic;color:#928374;"># 1. 提取当前分支的配置（非注释行）
+</span><span style="color:#fdf4c1;">grep -v </span><span style="color:#b8bb26;">&#39;^#&#39; &quot;$</span><span style="color:#fdf4c1;">1</span><span style="color:#b8bb26;">&quot; </span><span style="color:#fe8019;">&gt; </span><span style="color:#b8bb26;">&quot;$</span><span style="color:#fdf4c1;">1</span><span style="color:#b8bb26;">.tmp&quot;
+</span><span style="font-style:italic;color:#928374;"># 2. 追加源分支的注释（只保留注释行）
+</span><span style="color:#fdf4c1;">grep </span><span style="color:#b8bb26;">&#39;^#&#39; &quot;$</span><span style="color:#fdf4c1;">3</span><span style="color:#b8bb26;">&quot; </span><span style="color:#fe8019;">&gt;&gt; </span><span style="color:#b8bb26;">&quot;$</span><span style="color:#fdf4c1;">1</span><span style="color:#b8bb26;">.tmp&quot;
+</span><span style="font-style:italic;color:#928374;"># 3. 替换原文件
+</span><span style="color:#fdf4c1;">mv </span><span style="color:#b8bb26;">&quot;$</span><span style="color:#fdf4c1;">1</span><span style="color:#b8bb26;">.tmp&quot; &quot;$</span><span style="color:#fdf4c1;">1</span><span style="color:#b8bb26;">&quot;
+</span><span>
+</span><span style="font-style:italic;color:#928374;"># 必须返回0表示成功
+</span><span style="color:#fabd2f;">exit</span><span style="color:#fdf4c1;"> 0
+</span></code></pre>
+<h5 id="bu-zou-2-fu-yu-zhi-xing-quan-xian">步骤2：赋予执行权限</h5>
+<pre data-lang="bash" style="background-color:#282828;color:#fdf4c1aa;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#fdf4c1;">chmod +x merge-config.sh
+</span></code></pre>
+<h5 id="bu-zou-3-pei-zhi-qu-dong-guan-lian-jiao-ben">步骤3：配置驱动关联脚本</h5>
+<pre data-lang="bash" style="background-color:#282828;color:#fdf4c1aa;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="font-style:italic;color:#928374;"># 注意脚本路径需使用绝对路径
+</span><span style="color:#fdf4c1;">git config merge.smart-config.driver \
+</span><span style="color:#fdf4c1;">  </span><span style="color:#b8bb26;">&quot;$(</span><span style="color:#fdf4c1;">pwd</span><span style="color:#b8bb26;">)/merge-config.sh %A %O %B&quot;
+</span></code></pre>
+<h5 id="bu-zou-4-zai-gitattributes-zhong-ying-yong">步骤4：在 <code>.gitattributes</code> 中应用</h5>
+<pre data-lang="bash" style="background-color:#282828;color:#fdf4c1aa;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#fdf4c1;">config/mixed.conf merge=smart-config
+</span></code></pre>
+<ul>
+<li>效果：合并时自动保留当前分支的配置值，同时合并源分支的注释</li>
+<li>适用场景：需要部分保留双方内容的复杂配置文件</li>
+</ul>
+<h4 id="shi-li-4-chong-tu-shi-ti-shi-shou-dong-chu-li-zeng-qiang-ban-mo-ren-xing-wei">示例4：冲突时提示手动处理（增强版默认行为）</h4>
+<p>默认情况下，Git 会在冲突文件中插入 <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> 标记。可以自定义提示信息：</p>
+<pre data-lang="bash" style="background-color:#282828;color:#fdf4c1aa;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#fdf4c1;">git config merge.prompt-conflict.driver \
+</span><span style="color:#fdf4c1;">  </span><span style="color:#b8bb26;">&#39;if ! diff -q %A %B &gt;/dev/null; then echo &quot;⚠️ 请手动合并 %A&quot;; exit 1; else exit 0; fi&#39;
+</span></code></pre>
+<ul>
+<li>命令解释：
+<ul>
+<li><code>diff -q %A %B</code>：检查两个版本是否有差异</li>
+<li>若有差异（冲突），则输出提示并返回非0（让 Git 标记为冲突）</li>
+<li>若无差异，直接成功</li>
+</ul>
+</li>
+<li>适用场景：重要配置文件，不允许自动合并，必须人工确认</li>
+</ul>
+<h3 id="si-cha-kan-yu-shan-chu-yi-pei-zhi-de-qu-dong">四、查看与删除已配置的驱动</h3>
+<pre data-lang="bash" style="background-color:#282828;color:#fdf4c1aa;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="font-style:italic;color:#928374;"># 查看所有合并驱动
+</span><span style="color:#fdf4c1;">git config --list </span><span style="color:#fe8019;">| </span><span style="color:#fdf4c1;">grep merge.
+</span><span>
+</span><span style="font-style:italic;color:#928374;"># 删除某个驱动
+</span><span style="color:#fdf4c1;">git config --unset merge.ours.driver
+</span></code></pre>
+<h3 id="wu-zong-jie">五、总结</h3>
+<p>合并驱动的核心价值是<strong>自动化处理特定文件的合并规则</strong>，避免重复的手动操作：</p>
+<ul>
+<li>简单场景用 <code>true</code> 或 <code>cp %B %A</code> 即可满足需求</li>
+<li>复杂场景（如条件合并、内容提取）可以通过脚本实现</li>
+<li>配合 <code>.gitattributes</code> 精确控制哪些文件应用规则</li>
+</ul>
+
+        </div>
+        
+          <div class="row my-1">
+            <div class="col-auto">
+              <span class="bi bi-bookmarks fs-6 me-1"></span>
+              
+    <a
+      href="https://flyingicedragon.github.io/categories/technology/"
+      class="btn btn-taxonomy btn-sm m-1 border text-decoration-none"
+    >
+      <small>
+        technology
+      </small>
+    </a>
+  
+            </div>
+          </div>
+        
+        
+          <div class="row mt-1 mb-3">
+            <div class="col-auto">
+              <span class="bi bi-tags fs-6 me-1"></span>
+              
+    <a
+      href="https://flyingicedragon.github.io/tags/git/"
+      class="btn btn-taxonomy btn-sm m-1 border text-decoration-none"
+    >
+      <small>
+        git
+      </small>
+    </a>
+  
+            </div>
+          </div>
+        
+      </div>
+    </div>
+  </main><div class="container">
+    <div class="row justify-content-center mt-3 mb-4">
+      <div class="col-11 col-lg-10 col-xxl-9"></div>
+    </div>
+  </div><footer class="container-fluid mt-auto">
+    <div class="row justify-content-center">
+      <div class="col-10">
+        <div class="row pt-3 pb-4 border-top">
+          <div class="col-12 col-md-6 mb-2 mb-md-0 text-center text-md-start">
+            <small class="text-secondary">
+              © 2025
+              <a 
+                href="https://flyingicedragon.github.io/"
+                target="_blank" rel="noopener noreferrer"
+                class="text-decoration-none"
+              >
+                icedragon&period;
+              </a>
+              <a
+                href="https://creativecommons.org/licenses/by/4.0/"
+                data-bs-toggle="tooltip"
+                data-bs-title="Except where otherwise noted, the blog posts on this site are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) License by the author."
+                class="text-secondary text-decoration-none"
+              >
+                Some rights reserved.
+              </a>
+            </small>
+          </div>
+          <div class="col-12 col-md-6 text-center text-md-end">
+            <small class="text-secondary">
+              Powered by
+              <a 
+                href="https://www.getzola.org/"
+                target="_blank" rel="noopener noreferrer"
+                class="text-decoration-none"
+              >
+                Zola
+              </a>
+              with
+              <a 
+                href="https://github.com/gersonbdev/ataraxia-zola"
+                target="_blank" rel="noopener noreferrer"
+                class="text-decoration-none"
+              >
+                Ataraxia
+              </a>
+              theme.
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvas" aria-labelledby="offcanvasLabel">
+    <div class="offcanvas-body p-0">
+      <div class="sidebar container-fluid vh-100">
+        <div class="row h-100">
+          <div
+            class="col mh-100 px-0 overflow-auto"
+          >
+            <aside class="d-flex flex-column justify-content-between h-100">
+              <div class="mb-4 pt-5 px-3 text-center">
+                <div class="sidebar-avatar mb-2 mx-auto border border-3 rounded-circle">
+                  <a href="https://flyingicedragon.github.io/" target="_blank" rel="noopener noreferrer">
+    <img
+      src="https://flyingicedragon.github.io/images/avatar.png"
+      alt="icedragon"
+      class="img-fluid"
+    >
+  </a>
+                </div>
+                <div>
+                  <a
+                    href="https://flyingicedragon.github.io/"
+                    class="sidebar-title fs-5 fw-bold text-decoration-none"
+                  >
+                    冰龙圣土
+                  </a>
+                </div>
+              </div>
+
+              <div class="sidebar-nav list-group my-auto rounded-0 text-start"><a
+        href="https://flyingicedragon.github.io/"
+        class="sidebar-nav-item list-group-item list-group-item-action border border-0"
+        data-bs-toggle="tooltip" data-bs-title="Home"
+      >
+        <span class="sidebar-nav-icon bi bi-house ms-2 me-1 fs-4"></span>
+        <span class="sidebar-nav-text">Home</span>
+      </a><a
+        href="https://flyingicedragon.github.io/blog/"
+        class="sidebar-nav-item list-group-item list-group-item-action border border-0"
+        data-bs-toggle="tooltip" data-bs-title="Blog"
+      >
+        <span class="sidebar-nav-icon bi bi-file-earmark-text ms-2 me-1 fs-4"></span>
+        <span class="sidebar-nav-text">Blog</span>
+      </a><a
+        href="https://flyingicedragon.github.io/"
+        class="sidebar-nav-item list-group-item list-group-item-action border border-0"
+        data-bs-toggle="tooltip" data-bs-title="About"
+      >
+        <span class="sidebar-nav-icon bi bi-question-octagon ms-2 me-1 fs-4"></span>
+        <span class="sidebar-nav-text">About</span>
+      </a></div>
+
+              <div class="sidebar-social mt-4 pb-4 px-3">
+                <div class="container-fluid">
+                  <div class="row justify-content-center">
+                    <div class="col-auto px-2">
+        <a
+          href="mailto:flyingicedragon@outlook.com"
+          target="_blank" rel="noopener noreferrer"
+          data-bs-toggle="tooltip"
+          data-bs-title='Email'
+          class="text-decoration-none"
+        >
+          <span class="bi bi-envelope-fill"></span>
+        </a>
+      </div><div class="col-auto px-2">
+        <a
+          href="https://github.com/flyingicedragon"
+          target="_blank" rel="noopener noreferrer"
+          data-bs-toggle="tooltip"
+          data-bs-title='GitHub'
+          class="text-decoration-none"
+        >
+          <span class="bi bi-github"></span>
+        </a>
+      </div>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="searchModalLabel">
+          搜索
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div
+          id="searchInput" role="search" 
+          class="d-flex mb-3 border rounded-5 bg-white"
+        >
+          <input
+            id="search" type="search"
+            class="form-control border border-0 rounded-5 rounded-end"
+            placeholder="搜索"
+            aria-label="搜索"
+          >
+          <div class="rounded-5 rounded-start py-2 ps-2 pe-3">
+            <span class="bi bi-search"></span>
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  <script src="https://flyingicedragon.github.io/assets/js/bootstrap/bootstrap.bundle.min.js"></script>
+  <script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    const myModal = document.getElementById('searchModal');
+    const myInput = document.getElementById('searchInput');
+
+    myModal.addEventListener('shown.bs.modal', () => {
+      myInput.focus()
+    });
+  </script>
+  <script src="https://flyingicedragon.github.io/elasticlunr.min.js"></script>
+  <script src="https://flyingicedragon.github.io/search_index.zh.js"></script><script src="https://flyingicedragon.github.io/assets/js/search/lunr.stemmer.support.min.js"></script>
+    <script src="https://flyingicedragon.github.io/assets/js/search/lunr.zh.min.js"></script><script src="https://flyingicedragon.github.io/assets/js/search/search.js"></script>
+</body>
+</html>
