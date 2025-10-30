@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh">
+    <title>冰龙圣土 - Makefile</title>
+    <subtitle>飞舞的冰龙的个人空间</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://flyingicedragon.github.io/tags/makefile/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://flyingicedragon.github.io/"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2024-06-20T00:00:00+00:00</updated>
+    <id>https://flyingicedragon.github.io/tags/makefile/atom.xml</id>
+    <entry xml:lang="zh">
+        <title>Just 和 Justfile 简介与 fzf 配置</title>
+        <published>2024-06-20T00:00:00+00:00</published>
+        <updated>2024-06-20T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://flyingicedragon.github.io/blog/just/"/>
+        <id>https://flyingicedragon.github.io/blog/just/</id>
+        
+        <content type="html" xml:base="https://flyingicedragon.github.io/blog/just/">&lt;p&gt;&lt;code&gt;Just&lt;&#x2F;code&gt;是一个使用&lt;code&gt;Rust&lt;&#x2F;code&gt;开发的类似&lt;code&gt;Make&lt;&#x2F;code&gt;的保存和运行命令工具。其语法与&lt;code&gt;Make&lt;&#x2F;code&gt;高度类似。同于由于并非构建系统，所以语法相对简单。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;Just&lt;&#x2F;code&gt;拥有不错的中英文文档，相关内容不在此赘述。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a rel=&quot;noopener nofollow noreferrer&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;just.systems&#x2F;man&#x2F;en&#x2F;&quot;&gt;英文文档&lt;&#x2F;a&gt;&lt;br &#x2F;&gt;
+&lt;a rel=&quot;noopener nofollow noreferrer&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;just.systems&#x2F;man&#x2F;zh&#x2F;&quot;&gt;中文文档&lt;&#x2F;a&gt;时效性略低，建议只作为快速了解使用。后期查询详细功能还是直接看英文文档。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;yi-jiao-hu-fang-shi-xuan-ze-pei-fang&quot;&gt;以交互方式选择配方&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;code&gt;Just&lt;&#x2F;code&gt;支持&lt;code&gt;--choose&lt;&#x2F;code&gt;参数来唤起一个选择器来选择配方。默认选择器是&lt;code&gt;fzf&lt;&#x2F;code&gt;，同时也可以使用&lt;code&gt;--chooser&lt;&#x2F;code&gt;参数来设置一个选择器。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a rel=&quot;noopener nofollow noreferrer&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;just.systems&#x2F;man&#x2F;en&#x2F;chapter_53.html&quot;&gt;Doc&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;zai-zshzhong-she-zhi-kuai-jie-jian-diao-yong-fzf&quot;&gt;在&lt;code&gt;zsh&lt;&#x2F;code&gt;中设置快捷键调用&lt;code&gt;fzf&lt;&#x2F;code&gt;&lt;&#x2F;h2&gt;
+&lt;p&gt;添加以下内容至&lt;code&gt;.zshrc&lt;&#x2F;code&gt;：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;bindkey -s &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;^[OP&amp;quot; &amp;quot;just --choose^M&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;bindkey -s &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;^[OQ&amp;quot; &amp;quot;just -g --choose^M&amp;quot;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;bindkey&lt;&#x2F;code&gt;命令用于在&lt;code&gt;zsh&lt;&#x2F;code&gt;中绑定快捷键。&lt;code&gt;^[OP&lt;&#x2F;code&gt;和&lt;code&gt;^[OQ&lt;&#x2F;code&gt;分别对应&lt;code&gt;F1&lt;&#x2F;code&gt;和&lt;code&gt;F2&lt;&#x2F;code&gt;。可以在&lt;code&gt;zsh&lt;&#x2F;code&gt;中输入&lt;code&gt;cat&lt;&#x2F;code&gt;和&lt;code&gt;Enter&lt;&#x2F;code&gt;后再键入相关按键查看相关symbols。&lt;&#x2F;p&gt;
+&lt;p&gt;这里使用&lt;code&gt;F1&lt;&#x2F;code&gt;选择当前项目中的命令，使用&lt;code&gt;F2&lt;&#x2F;code&gt;选择全局命令。&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>

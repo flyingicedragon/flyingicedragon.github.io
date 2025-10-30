@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh">
+    <title>冰龙圣土 - snakemake</title>
+    <subtitle>飞舞的冰龙的个人空间</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://flyingicedragon.github.io/tags/snakemake/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://flyingicedragon.github.io/"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2025-10-30T00:00:00+00:00</updated>
+    <id>https://flyingicedragon.github.io/tags/snakemake/atom.xml</id>
+    <entry xml:lang="zh">
+        <title>解决Snakemake module 中config引用异常的优雅方案</title>
+        <published>2025-10-30T00:00:00+00:00</published>
+        <updated>2025-10-30T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://flyingicedragon.github.io/blog/jie-jue-snakemake-module-zhong-config-yin-yong-yi-chang-de-you-ya-fang-an/"/>
+        <id>https://flyingicedragon.github.io/blog/jie-jue-snakemake-module-zhong-config-yin-yong-yi-chang-de-you-ya-fang-an/</id>
+        
+        <content type="html" xml:base="https://flyingicedragon.github.io/blog/jie-jue-snakemake-module-zhong-config-yin-yong-yi-chang-de-you-ya-fang-an/">&lt;h2 id=&quot;jie-jue-snakemake-module-zhong-configyin-yong-yi-chang-de-you-ya-fang-an&quot;&gt;解决Snakemake module 中config引用异常的优雅方案&lt;&#x2F;h2&gt;
+&lt;p&gt;在使用Snakemake的module功能时，你可能会遇到一个隐蔽的问题：在module的shell代码块中直接使用&lt;code&gt;config[key]&lt;&#x2F;code&gt;时，实际调用的是全局配置而非module指定的局部配置。这是Snakemake的一个已知bug（&lt;a rel=&quot;noopener nofollow noreferrer&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;snakemake&#x2F;snakemake&#x2F;issues&#x2F;1688&quot;&gt;#1688&lt;&#x2F;a&gt;），本文将介绍其解决思路及完整测试案例。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;wen-ti-gen-yuan-yu-xian-you-fang-an-ju-xian&quot;&gt;问题根源与现有方案局限&lt;&#x2F;h3&gt;
+&lt;p&gt;当在module中通过&lt;code&gt;config: config[&amp;quot;x&amp;quot;]&lt;&#x2F;code&gt;指定局部配置后，若在规则的&lt;code&gt;shell&lt;&#x2F;code&gt;部分直接使用&lt;code&gt;{config[key]}&lt;&#x2F;code&gt;，会发现其仍引用全局config。这是因为module的shell解析器无法正确识别局部config。&lt;&#x2F;p&gt;
+&lt;p&gt;现有方案多通过&lt;code&gt;params&lt;&#x2F;code&gt;传递配置（如&lt;code&gt;params: k=config[&#x27;k&#x27;]&lt;&#x2F;code&gt;再用&lt;code&gt;{params.k}&lt;&#x2F;code&gt;），但会产生大量重复代码，不够简洁。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;geng-you-ya-de-jie-jue-fang-fa&quot;&gt;更优雅的解决方法&lt;&#x2F;h3&gt;
+&lt;p&gt;核心思路：避免在module的&lt;code&gt;shell&lt;&#x2F;code&gt;块中直接引用&lt;code&gt;config&lt;&#x2F;code&gt;。通过&lt;code&gt;run&lt;&#x2F;code&gt;块结合&lt;code&gt;shell()&lt;&#x2F;code&gt;函数，可间接使用局部config——&lt;code&gt;run&lt;&#x2F;code&gt;块能正确识别module的局部配置，再通过&lt;code&gt;shell()&lt;&#x2F;code&gt;执行命令即可。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;wan-zheng-ce-shi-yong-li&quot;&gt;完整测试用例&lt;&#x2F;h3&gt;
+&lt;h4 id=&quot;1-xiang-mu-jie-gou&quot;&gt;1. 项目结构&lt;&#x2F;h4&gt;
+&lt;pre style=&quot;background-color:#282828;color:#fdf4c1aa;&quot;&gt;&lt;code&gt;&lt;span&gt;snakemake&#x2F;
+&lt;&#x2F;span&gt;&lt;span&gt;├── Snakefile       ## 主工作流
+&lt;&#x2F;span&gt;&lt;span&gt;├── config.yaml     ## 配置文件
+&lt;&#x2F;span&gt;&lt;span&gt;└── m.smk           ## 模块文件
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;2-wen-jian-nei-rong&quot;&gt;2. 文件内容&lt;&#x2F;h4&gt;
+&lt;h5 id=&quot;1-config-yaml-quan-ju-yu-mo-kuai-pei-zhi&quot;&gt;（1）config.yaml（全局与模块配置）&lt;&#x2F;h5&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;font-weight:bold;color:#8ec07c;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;x_global  &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;## 全局配置
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-weight:bold;color:#8ec07c;&quot;&gt;m&lt;&#x2F;span&gt;&lt;span&gt;:           &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;## 模块m的局部配置
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;font-weight:bold;color:#8ec07c;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;x_module
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d3869b;&quot;&gt;y&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;y_module
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h5 id=&quot;2-snakefile-zhu-gong-zuo-liu&quot;&gt;（2）Snakefile（主工作流）&lt;&#x2F;h5&gt;
+&lt;pre data-lang=&quot;python&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span&gt;configfile: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;config.yaml&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;## 总规则，依赖两个输出文件
+&lt;&#x2F;span&gt;&lt;span&gt;rule &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fabd2f;&quot;&gt;all&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fabd2f;&quot;&gt;input&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;a.out&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;m&#x2F;a.out&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;## 全局规则：直接在shell中使用config[x]（引用全局配置）
+&lt;&#x2F;span&gt;&lt;span&gt;rule a:
+&lt;&#x2F;span&gt;&lt;span&gt;    output: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;a.out&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;    shell: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;echo &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;{config[x]}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt; &amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;{output}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;## 引入模块m，指定使用config[&amp;quot;m&amp;quot;]作为局部配置
+&lt;&#x2F;span&gt;&lt;span&gt;module m:
+&lt;&#x2F;span&gt;&lt;span&gt;    snakefile: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;m.smk&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;    prefix: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;m&amp;quot;  &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;## 输出文件会放在m&#x2F;目录下
+&lt;&#x2F;span&gt;&lt;span&gt;    config: config[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;m&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;## 使用模块m中的所有规则，命名为m_*
+&lt;&#x2F;span&gt;&lt;span&gt;use rule &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fe8019;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fa5c4b;&quot;&gt;from &lt;&#x2F;span&gt;&lt;span&gt;m &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#932b1e;color:#fdf4c1;&quot;&gt;as&lt;&#x2F;span&gt;&lt;span&gt; m_&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fe8019;&quot;&gt;*
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h5 id=&quot;3-m-smk-mo-kuai-wen-jian&quot;&gt;（3）m.smk（模块文件）&lt;&#x2F;h5&gt;
+&lt;pre data-lang=&quot;python&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;## 验证模块能读取局部config[y]
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fabd2f;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;(config[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;y&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;])  &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;## 运行时会输出&amp;quot;y_module&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;## 模块内规则：用run+shell()使用局部config[x]
+&lt;&#x2F;span&gt;&lt;span&gt;rule a:
+&lt;&#x2F;span&gt;&lt;span&gt;    output: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;a.out&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;    run:
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#928374;&quot;&gt;## 在run块中读取局部config[x]，通过shell()执行命令
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;shell(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;#39;echo &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;%s&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt; &amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;{output}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;#39; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fe8019;&quot;&gt;% &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;config[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;#39;x&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;])
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;3-yun-xing-yu-yan-zheng&quot;&gt;3. 运行与验证&lt;&#x2F;h4&gt;
+&lt;h5 id=&quot;zhi-xing-ming-ling&quot;&gt;执行命令&lt;&#x2F;h5&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;snakemake --cores 1
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h5 id=&quot;yu-qi-jie-guo&quot;&gt;预期结果&lt;&#x2F;h5&gt;
+&lt;ul&gt;
+&lt;li&gt;全局规则&lt;code&gt;a&lt;&#x2F;code&gt;生成&lt;code&gt;a.out&lt;&#x2F;code&gt;，内容为&lt;code&gt;x_global&lt;&#x2F;code&gt;（引用全局config）；&lt;&#x2F;li&gt;
+&lt;li&gt;模块规则&lt;code&gt;m_a&lt;&#x2F;code&gt;生成&lt;code&gt;m&#x2F;a.out&lt;&#x2F;code&gt;，内容为&lt;code&gt;x_module&lt;&#x2F;code&gt;（引用模块局部config）；&lt;&#x2F;li&gt;
+&lt;li&gt;运行日志中会打印&lt;code&gt;y_module&lt;&#x2F;code&gt;，证明模块成功读取局部配置。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;zong-jie&quot;&gt;总结&lt;&#x2F;h3&gt;
+&lt;p&gt;通过&lt;code&gt;run&lt;&#x2F;code&gt;块+&lt;code&gt;shell()&lt;&#x2F;code&gt;函数的组合，既能规避module中shell解析config的bug，又能减少冗余代码，是处理Snakemake模块配置问题的实用技巧。&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>

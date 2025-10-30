@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh">
+    <title>冰龙圣土 - 网络</title>
+    <subtitle>飞舞的冰龙的个人空间</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://flyingicedragon.github.io/tags/wang-luo/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://flyingicedragon.github.io/"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2024-04-10T00:00:00+00:00</updated>
+    <id>https://flyingicedragon.github.io/tags/wang-luo/atom.xml</id>
+    <entry xml:lang="zh">
+        <title>利用 certbot 配置 SSL 证书</title>
+        <published>2024-04-10T00:00:00+00:00</published>
+        <updated>2024-04-10T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://flyingicedragon.github.io/blog/certbot/"/>
+        <id>https://flyingicedragon.github.io/blog/certbot/</id>
+        
+        <content type="html" xml:base="https://flyingicedragon.github.io/blog/certbot/">&lt;p&gt;&lt;code&gt;certbot&lt;&#x2F;code&gt; 是 &lt;code&gt;Let’s Encrypt&lt;&#x2F;code&gt; 提供的官方工具，用于辅助获取 SSL 证书。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;certbot-an-zhuang&quot;&gt;certbot 安装&lt;&#x2F;h2&gt;
+&lt;p&gt;官方建议的安装方式是利用 &lt;code&gt;snap&lt;&#x2F;code&gt;。但是个人实在是讨厌 &lt;code&gt;snap&lt;&#x2F;code&gt; 这个工具，而是更青睐于 &lt;code&gt;apt&lt;&#x2F;code&gt;。&lt;code&gt;certbot&lt;&#x2F;code&gt; 包含在了 Debian 官方仓库中，可以直接安装。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;apt install certbot
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;apt install certbot --install-suggests
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;如果需要 &lt;code&gt;apache&lt;&#x2F;code&gt; 或者 &lt;code&gt;nginx&lt;&#x2F;code&gt; 的自动配置，可以直接安装 suggests 部分。如果不需要，则无需添加 &lt;code&gt;--install-suggests&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;此外，还可以考虑使用 &lt;a rel=&quot;noopener nofollow noreferrer&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;dl.eff.org&#x2F;certbot-auto&quot;&gt;certbot-auto&lt;&#x2F;a&gt;。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;sheng-cheng-ssl-zheng-shu&quot;&gt;生成 SSL 证书&lt;&#x2F;h2&gt;
+&lt;h3 id=&quot;jiao-hu-shi-shou-dong-huo-qu-ren-zheng-manual&quot;&gt;交互式手动获取认证 &lt;code&gt;--manual&lt;&#x2F;code&gt;&lt;&#x2F;h3&gt;
+&lt;p&gt;以下两种域名可以通过指定多个 &lt;code&gt;-d&lt;&#x2F;code&gt; 参数一次性完成。&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;fan-yu-ming-zheng-shu&quot;&gt;泛域名证书&lt;&#x2F;h4&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;certbot run -d &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;*.example.com&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt; --manual
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;泛域名认证需要添加一条 TXT 类型域名记录，根据提示操作即可。&lt;&#x2F;p&gt;
+&lt;img alt=&quot;DNS TXT&quot; src=&quot;DNS_TXT.png&quot; width=&quot;100%&quot;&gt;
+&lt;h4 id=&quot;pu-tong-yu-ming-zheng-shu&quot;&gt;普通域名证书&lt;&#x2F;h4&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;certbot run -d &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b8bb26;&quot;&gt;&amp;quot;example.com&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt; --manual
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;需要搭建一个临时 HTTP 服务器包含有指定的内容。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;nginx-apache-deng&quot;&gt;nginx、apache 等&lt;&#x2F;h3&gt;
+&lt;p&gt;可以直接利用 &lt;code&gt;--nginx&lt;&#x2F;code&gt;、&lt;code&gt;--apache&lt;&#x2F;code&gt; 参数调用 plugin 辅助完成。&lt;code&gt;certbot&lt;&#x2F;code&gt; 会自动修改配置文件。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;cha-kan-zheng-shu-zhuang-tai&quot;&gt;查看证书状态&lt;&#x2F;h2&gt;
+&lt;p&gt;证书三个月内有效，可以查看证书状态。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;certbot certificates
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;xu-qian-zheng-shu&quot;&gt;续签证书&lt;&#x2F;h2&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;certbot renew
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;根据情况添加参数。续签证书和首次生成相同，需要重新进行认证。普通域名配合 &lt;code&gt;nginx&lt;&#x2F;code&gt; 等工具可以很方便完成，泛域名需要修改 DNS 记录。可以利用 &lt;code&gt;--manual-auth-hook&lt;&#x2F;code&gt; 和 &lt;code&gt;--manual-cleanup-hook&lt;&#x2F;code&gt; 参数来提供脚本配合 DNS 服务商的 api 实现自动修改 DNS 记录。&lt;code&gt;renew&lt;&#x2F;code&gt; 不支持交互方式完成。&lt;&#x2F;p&gt;
+&lt;p&gt;因为获取证书有次数限制，建议使用 &lt;code&gt;--dry-run&lt;&#x2F;code&gt; 进行测试。测试完成后，&lt;code&gt;renew&lt;&#x2F;code&gt; 会自动进行 30 天内过期证书的续签工作。&lt;&#x2F;p&gt;
+&lt;p&gt;参考资料：&lt;a rel=&quot;noopener nofollow noreferrer&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;eff-certbot.readthedocs.io&#x2F;en&#x2F;latest&#x2F;index.html&quot;&gt;Certbot&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="zh">
+        <title>Linux下wget下载整个FTP目录(含子目录)</title>
+        <published>2020-09-05T00:00:00+00:00</published>
+        <updated>2020-09-05T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://flyingicedragon.github.io/blog/wget/"/>
+        <id>https://flyingicedragon.github.io/blog/wget/</id>
+        
+        <content type="html" xml:base="https://flyingicedragon.github.io/blog/wget/">&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;wget -nH -m --ftp-user&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fe8019;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;your_username --ftp-password&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fe8019;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;your_password ftp:&#x2F;&#x2F;your_ftp_host&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fe8019;&quot;&gt;*
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;-nH：不创建以主机名命名的目录&lt;br &#x2F;&gt;
+--cut-dirs：后面接希望去掉原来的目录层数，从根目录开始计算。如果想完全保留 FTP 原有的目录结构，则不要加该参数。&lt;br &#x2F;&gt;
+-m：下载所有子目录并且保留目录结构。&lt;br &#x2F;&gt;
+–ftp-user：FTP用户名&lt;br &#x2F;&gt;
+–ftp-password：FTP 密码&lt;br &#x2F;&gt;
+ftp:&#x2F;&#x2F;...&#x2F;*：FTP 主机地址。最后可以跟目录名来下载指定目录。&lt;&#x2F;p&gt;
+&lt;p&gt;例子：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282828;color:#fdf4c1aa;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;wget -nH -m --ftp-user&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fe8019;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;tom --ftp-password&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fe8019;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#fdf4c1;&quot;&gt;123456 ftp:&#x2F;&#x2F;192.168.19.1&#x2F;tom&#x2F;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;https:&#x2F;&#x2F;www.cnblogs.com&#x2F;ftl1012&#x2F;p&#x2F;9265699.html&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+</content>
+        
+    </entry>
+</feed>
